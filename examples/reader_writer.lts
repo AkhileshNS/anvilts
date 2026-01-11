@@ -1,0 +1,20 @@
+// Reader-Writer System
+// Multiple readers can read simultaneously, but writers need exclusive access
+
+const N = 2  // Number of readers
+range T = 0..N
+
+RW = RW[0][0],
+RW[readers:T][writers:0..1] = 
+    (when (writers==0 && readers<N) acquireRead -> RW[readers+1][writers]
+    |when (readers>0) releaseRead -> RW[readers-1][writers]
+    |when (writers==0 && readers==0) acquireWrite -> RW[readers][writers+1]
+    |when (writers>0) releaseWrite -> RW[readers][writers-1]
+    ).
+
+READER = (acquireRead -> read -> releaseRead -> READER).
+WRITER = (acquireWrite -> write -> releaseWrite -> WRITER).
+
+||READER_WRITER = (READER || WRITER || RW).
+
+// This system should be deadlock-free

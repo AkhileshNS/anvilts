@@ -1,0 +1,18 @@
+// Deadlock Example - Dining Philosophers (simplified with 2 philosophers)
+// This demonstrates a classic deadlock scenario
+
+// Two resources (forks)
+FORK = (get -> put -> FORK).
+
+// Each philosopher needs both forks
+PHIL = (left.get -> right.get -> eat -> left.put -> right.put -> PHIL).
+
+// Two philosophers sharing two forks
+||DINING = (phil[1]:PHIL || phil[2]:PHIL 
+           || {phil[1].left, phil[2].right}::FORK
+           || {phil[1].right, phil[2].left}::FORK).
+
+// This system has a potential deadlock:
+// - Phil1 gets left fork
+// - Phil2 gets right fork
+// - Both wait indefinitely for the other fork

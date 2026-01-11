@@ -1,0 +1,4 @@
+// Simple Switch Example
+// A basic switch that can be turned on and off
+
+SWITCH = (on -> off -> SWITCH).
