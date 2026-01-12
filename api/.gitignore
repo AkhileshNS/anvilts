@@ -1,13 +1,8 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-.venv
+# Dependencies
+node_modules/
+
+# Build output
+dist/
 
 # IDE
 .vscode/
@@ -16,11 +11,19 @@ ENV/
 *.swo
 *~
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Temp files
 *.lts.tmp
 temp_*.lts
+
+# OS
+.DS_Store
+Thumbs.db

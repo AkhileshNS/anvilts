@@ -5,21 +5,12 @@
 echo "Starting LTSA REST API..."
 echo ""
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
-    echo "Virtual environment not found. Creating one..."
-    python -m venv venv
-    echo "✓ Virtual environment created"
+# Check if node_modules exists
+if [ ! -d "node_modules" ]; then
+    echo "Installing dependencies..."
+    npm install
+    echo "✓ Dependencies installed"
 fi
-
-# Activate virtual environment
-echo "Activating virtual environment..."
-source venv/bin/activate
-
-# Install/update dependencies
-echo "Installing dependencies..."
-pip install -q -r requirements.txt
-echo "✓ Dependencies installed"
 
 # Check if Java is available
 if ! command -v java &> /dev/null; then
@@ -35,10 +26,9 @@ fi
 echo ""
 echo "Starting API server..."
 echo "API will be available at: http://localhost:8000"
-echo "API documentation at: http://localhost:8000/docs"
 echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Start the server
-python main.py
+# Start the server in dev mode
+npm run dev

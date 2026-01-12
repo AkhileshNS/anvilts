@@ -16,9 +16,11 @@ This project bridges the gap between natural language descriptions of concurrent
 anvilts/
 ├── ltsp.jar              # LTSA CLI compiler
 ├── ltsp.README.md        # Documentation for ltsp.jar
-├── api/                  # REST API service
-│   ├── main.py          # FastAPI application
-│   ├── requirements.txt # Python dependencies
+├── api/                  # REST API service (TypeScript/Express)
+│   ├── src/
+│   │   └── index.ts     # Express application
+│   ├── package.json     # Dependencies and scripts
+│   ├── tsconfig.json    # TypeScript configuration
 │   ├── start.sh         # Linux/Mac start script
 │   ├── start.bat        # Windows start script
 │   └── README.md        # API documentation
@@ -33,9 +35,8 @@ anvilts/
 
 ### Prerequisites
 
-- **Python 3.8+** - For running the REST API
+- **Node.js 18+** - For running the REST API
 - **Java Runtime Environment** - For executing ltsp.jar
-- **Node.js** (optional) - If you want to build a frontend
 
 ### 1. Start the REST API
 
@@ -55,25 +56,15 @@ chmod +x start.sh
 **Manual start:**
 ```bash
 cd api
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-pip install -r requirements.txt
-python main.py
+npm install
+npm run dev
 ```
 
-The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`
+The API will be available at `http://localhost:8000`
 
 ### 2. Test the API
 
-Run the example tests:
-
-```bash
-cd api
-python test_examples.py
-```
-
-Or use curl:
+Use curl:
 
 ```bash
 curl -X POST http://localhost:8000/parse \

@@ -4,7 +4,7 @@ A REST API wrapper for the LTSA (Labeled Transition System Analyzer) CLI, provid
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Node.js 18 or higher
 - Java Runtime Environment (JRE) - required to run `ltsp.jar`
 - The `ltsp.jar` file in the project root directory
 
@@ -15,41 +15,36 @@ A REST API wrapper for the LTSA (Labeled Transition System Analyzer) CLI, provid
 cd api
 ```
 
-2. Create a virtual environment (recommended):
+2. Install dependencies:
 ```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
+npm install
 ```
 
 ## Running the Service
 
-Start the API server:
-
+**Development mode (with hot reload):**
 ```bash
-python main.py
+npm run dev
 ```
 
-Or use uvicorn directly:
-
+**Production mode:**
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+npm run build
+npm start
+```
+
+**Quick start (Windows):**
+```bash
+start.bat
+```
+
+**Quick start (Linux/Mac):**
+```bash
+chmod +x start.sh
+./start.sh
 ```
 
 The API will be available at: `http://localhost:8000`
-
-Interactive API documentation (Swagger UI): `http://localhost:8000/docs`
-
-Alternative API docs (ReDoc): `http://localhost:8000/redoc`
 
 ## API Endpoints
 
@@ -109,8 +104,8 @@ Checks if processes are deadlock-free.
 **Request Body:**
 ```json
 {
-  "content": "MUTEX = SEMAPHORE(1).\nSEMAPHORE(N=1) = SEMA[0],\nSEMA[i:0..N] = (when(i<N) acquire -> SEMA[i+1] | when(i>0) release -> SEMA[i-1]).",
-  "process": "MUTEX"
+  "content": "LOCK = (acquire -> release -> LOCK).\nPROCESS = (acquire -> work -> release -> PROCESS).\n||SYSTEM = (PROCESS || LOCK).",
+  "process": "SYSTEM"
 }
 ```
 
@@ -137,7 +132,7 @@ Verifies if a specified LTL (Linear Temporal Logic) property holds.
 **Request Body:**
 ```json
 {
-  "content": "P = (a -> b -> P).\nQ = (c -> Q).\n||SYSTEM = (P || Q).\nproperty SAFE = (a -> b -> SAFE).\nassert SAFE_HOLDS = SYSTEM |= SAFE.",
+  "content": "P = (a -> b -> P).\n||SYSTEM = P.\nassert SAFE_HOLDS = ...",
   "process": "SYSTEM",
   "property": "SAFE_HOLDS"
 }
@@ -180,20 +175,6 @@ curl -X POST http://localhost:8000/check/safety \
   }'
 ```
 
-### Using Python requests
-
-```python
-import requests
-
-url = "http://localhost:8000/parse"
-data = {
-    "content": "SWITCH = (on -> off -> SWITCH)."
-}
-
-response = requests.post(url, json=data)
-print(response.json())
-```
-
 ### Using JavaScript fetch
 
 ```javascript
@@ -211,21 +192,50 @@ const result = await response.json();
 console.log(result);
 ```
 
+### Using Python requests
+
+```python
+import requests
+
+url = "http://localhost:8000/parse"
+data = {
+    "content": "SWITCH = (on -> off -> SWITCH)."
+}
+
+response = requests.post(url, json=data)
+print(response.json())
+```
+
 ## Error Handling
 
 The API returns appropriate HTTP status codes:
 
 - `200 OK`: Request processed successfully
+- `400 Bad Request`: Missing required fields
 - `408 Request Timeout`: Command execution exceeded 30 seconds
-- `422 Unprocessable Entity`: Invalid request body
 - `500 Internal Server Error`: Server-side error (e.g., Java not found)
 
 ## Development
 
-To run in development mode with auto-reload:
+### Scripts
 
-```bash
-uvicorn main:app --reload
+- `npm run dev` - Start in development mode with hot reload
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm start` - Run the compiled JavaScript
+- `npm run typecheck` - Type-check without building
+
+### Project Structure
+
+```
+api/
+├── src/
+│   └── index.ts       # Express application
+├── dist/              # Compiled JavaScript (generated)
+├── package.json       # Dependencies and scripts
+├── tsconfig.json      # TypeScript configuration
+├── start.bat          # Windows start script
+├── start.sh           # Linux/Mac start script
+└── README.md          # This file
 ```
 
 ## Notes
@@ -234,22 +244,3 @@ uvicorn main:app --reload
 - Command execution has a 30-second timeout to prevent hanging
 - CORS is enabled for all origins (adjust in production as needed)
 - All endpoints use POST requests to accept LTS content in the request body
-
-## Project Structure
-
-```
-api/
-├── main.py              # FastAPI application
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
-```
-
-## Future Enhancements
-
-Potential improvements:
-- File upload support (in addition to content in JSON)
-- Batch verification of multiple files
-- WebSocket support for real-time streaming of long-running verifications
-- Caching of compilation results
-- Rate limiting and authentication
-- Docker containerization

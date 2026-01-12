@@ -4,21 +4,12 @@ REM LTSA REST API Start Script for Windows
 echo Starting LTSA REST API...
 echo.
 
-REM Check if virtual environment exists
-if not exist "venv\" (
-    echo Virtual environment not found. Creating one...
-    python -m venv venv
-    echo [OK] Virtual environment created
+REM Check if node_modules exists
+if not exist "node_modules\" (
+    echo Installing dependencies...
+    call npm install
+    echo [OK] Dependencies installed
 )
-
-REM Activate virtual environment
-echo Activating virtual environment...
-call venv\Scripts\activate.bat
-
-REM Install/update dependencies
-echo Installing dependencies...
-pip install -q -r requirements.txt
-echo [OK] Dependencies installed
 
 REM Check if Java is available
 where java >nul 2>nul
@@ -35,10 +26,9 @@ if not exist "..\ltsp.jar" (
 echo.
 echo Starting API server...
 echo API will be available at: http://localhost:8000
-echo API documentation at: http://localhost:8000/docs
 echo.
 echo Press Ctrl+C to stop the server
 echo.
 
-REM Start the server
-python main.py
+REM Start the server in dev mode
+call npm run dev
