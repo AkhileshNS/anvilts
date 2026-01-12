@@ -1,0 +1,14 @@
+PHIL(i=0) = (sitdown
+          -> (if (i%2==0) then {left.get->right.get} else {right.get->left.get})
+          -> eat
+          -> (if (i%2==0) then {right.put->left.put} else {left.put->right.put})
+          -> arise->PHIL(i)).
+
+FORK = (get -> put -> FORK).
+
+||DINERS(N=5)= 
+   forall [i:0..N-1] 
+   (phil[i]:PHIL(i) 
+   ||{phil[i].left,phil[((i-1)+N)%N].right}::FORK).
+
+menu RUN = {phil[0..4].{sitdown,eat}}
