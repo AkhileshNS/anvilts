@@ -1,0 +1,50 @@
+{
+  "processes": [
+    {
+      "name": "PHIL0",
+      "initialState": "THINKING",
+      "transitions": [
+        { "fromState": "THINKING", "toState": "HUNGRY", "action": "phil0_hungry" },
+        { "fromState": "HUNGRY", "toState": "HAS_LEFT", "action": "pick_fork0" },
+        { "fromState": "HAS_LEFT", "toState": "EATING", "action": "pick_fork1" },
+        { "fromState": "EATING", "toState": "DONE_LEFT", "action": "put_fork1" },
+        { "fromState": "DONE_LEFT", "toState": "THINKING", "action": "put_fork0" }
+      ]
+    },
+    {
+      "name": "PHIL1",
+      "initialState": "THINKING",
+      "transitions": [
+        { "fromState": "THINKING", "toState": "HUNGRY", "action": "phil1_hungry" },
+        { "fromState": "HUNGRY", "toState": "HAS_LEFT", "action": "pick_fork1" },
+        { "fromState": "HAS_LEFT", "toState": "EATING", "action": "pick_fork2" },
+        { "fromState": "EATING", "toState": "DONE_LEFT", "action": "put_fork2" },
+        { "fromState": "DONE_LEFT", "toState": "THINKING", "action": "put_fork1" }
+      ]
+    },
+    {
+      "name": "FORK0",
+      "initialState": "DOWN",
+      "transitions": [
+        { "fromState": "DOWN", "toState": "UP", "action": "pick_fork0" },
+        { "fromState": "UP", "toState": "DOWN", "action": "put_fork0" }
+      ]
+    },
+    {
+      "name": "FORK1",
+      "initialState": "DOWN",
+      "transitions": [
+        { "fromState": "DOWN", "toState": "UP", "action": "pick_fork1" },
+        { "fromState": "UP", "toState": "DOWN", "action": "put_fork1" }
+      ]
+    },
+    {
+      "name": "FORK2",
+      "initialState": "DOWN",
+      "transitions": [
+        { "fromState": "DOWN", "toState": "UP", "action": "pick_fork2" },
+        { "fromState": "UP", "toState": "DOWN", "action": "put_fork2" }
+      ]
+    }
+  ]
+}

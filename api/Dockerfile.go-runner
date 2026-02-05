@@ -1,0 +1,15 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Go Runner - Minimal container for executing transpiled LTS code
+# ═══════════════════════════════════════════════════════════════════════════
+
+FROM golang:1.22-alpine
+
+# Set working directory
+WORKDIR /app
+
+# No dependencies needed - we compile and run single-file Go programs
+# The Go code will be mounted or passed in at runtime
+
+# Default command: compile and run main.go
+# Usage: docker run -v ./output.go:/app/main.go go-runner
+CMD ["sh", "-c", "go run /app/main.go"]

@@ -1,0 +1,12 @@
+{
+  "processes": [
+    {
+      "name": "SWITCH",
+      "initialState": "OFF",
+      "transitions": [
+        { "fromState": "OFF", "toState": "ON", "action": "turn_on" },
+        { "fromState": "ON", "toState": "OFF", "action": "turn_off" }
+      ]
+    }
+  ]
+}

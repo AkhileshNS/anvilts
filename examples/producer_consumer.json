@@ -1,0 +1,28 @@
+{
+  "processes": [
+    {
+      "name": "PRODUCER",
+      "initialState": "READY",
+      "transitions": [
+        { "fromState": "READY", "toState": "PRODUCING", "action": "start_produce" },
+        { "fromState": "PRODUCING", "toState": "READY", "action": "put" }
+      ]
+    },
+    {
+      "name": "CONSUMER",
+      "initialState": "WAITING",
+      "transitions": [
+        { "fromState": "WAITING", "toState": "CONSUMING", "action": "get" },
+        { "fromState": "CONSUMING", "toState": "WAITING", "action": "consume" }
+      ]
+    },
+    {
+      "name": "BUFFER",
+      "initialState": "EMPTY",
+      "transitions": [
+        { "fromState": "EMPTY", "toState": "FULL", "action": "put" },
+        { "fromState": "FULL", "toState": "EMPTY", "action": "get" }
+      ]
+    }
+  ]
+}

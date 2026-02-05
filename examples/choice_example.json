@@ -1,0 +1,24 @@
+{
+  "processes": [
+    {
+      "name": "VENDING_MACHINE",
+      "initialState": "IDLE",
+      "transitions": [
+        { "fromState": "IDLE", "toState": "COIN_INSERTED", "action": "insert_coin" },
+        { "fromState": "COIN_INSERTED", "toState": "IDLE", "action": "dispense_coffee" },
+        { "fromState": "COIN_INSERTED", "toState": "IDLE", "action": "dispense_tea" },
+        { "fromState": "COIN_INSERTED", "toState": "IDLE", "action": "refund" }
+      ]
+    },
+    {
+      "name": "CUSTOMER",
+      "initialState": "WANT_DRINK",
+      "transitions": [
+        { "fromState": "WANT_DRINK", "toState": "WAITING", "action": "insert_coin" },
+        { "fromState": "WAITING", "toState": "SATISFIED", "action": "dispense_coffee" },
+        { "fromState": "WAITING", "toState": "SATISFIED", "action": "dispense_tea" },
+        { "fromState": "SATISFIED", "toState": "WANT_DRINK", "action": "drink" }
+      ]
+    }
+  ]
+}
