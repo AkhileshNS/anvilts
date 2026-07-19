@@ -1,0 +1,11 @@
+{
+  "name": "coin",
+  "alphabet": ["tau", "toss", "heads", "tails"],
+  "initial": 0,
+  "transitions": [
+    { "from": 0, "action": "toss", "to": 1 },
+    { "from": 0, "action": "toss", "to": 2 },
+    { "from": 1, "action": "heads", "to": 0 },
+    { "from": 2, "action": "tails", "to": 0 }
+  ]
+}
