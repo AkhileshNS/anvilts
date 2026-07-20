@@ -20,6 +20,11 @@ import type { SceneChangeSummary } from "./Whiteboard";
 const Whiteboard = lazy(() =>
   import("./Whiteboard").then((module) => ({ default: module.Whiteboard })),
 );
+const LtsPlayground = lazy(() =>
+  import("./LtsPlayground").then((module) => ({
+    default: module.LtsPlayground,
+  })),
+);
 
 const TABS = ["Whiteboard", "Processes", "Verification"] as const;
 
@@ -126,81 +131,6 @@ function EmptyPreview({ tab }: { tab: WorkspaceTab }) {
       <p className="eyebrow">{selected.eyebrow}</p>
       <h2>{selected.title}</h2>
       <p>{selected.body}</p>
-    </div>
-  );
-}
-
-function FormalModelPreview({
-  project,
-  variantId,
-}: {
-  project: DemoProject;
-  variantId: string;
-}) {
-  const variant = project.variants.find((candidate) => candidate.id === variantId)!;
-  const sketch = createSystemSketch(project, variantId);
-  const localStateCount = variant.machines.reduce((total, machine) => {
-    const states = new Set([
-      machine.initial,
-      ...machine.transitions.flatMap((transition) => [transition.from, transition.to]),
-    ]);
-    return total + states.size;
-  }, 0);
-  const transitionCount = variant.machines.reduce(
-    (total, machine) => total + machine.transitions.length,
-    0,
-  );
-
-  return (
-    <div className="formal-model-preview">
-      <div className="formal-model-heading">
-        <span className="confirmation-mark" aria-hidden="true">
-          <Check size={17} strokeWidth={2.4} />
-        </span>
-        <div>
-          <p className="eyebrow">Confirmed model</p>
-          <h2>{variant.label}</h2>
-          <p>The visual sketch is frozen as the input to formalization.</p>
-        </div>
-      </div>
-
-      <dl className="model-metrics">
-        <div>
-          <dt>Processes</dt>
-          <dd>{variant.machines.length}</dd>
-        </div>
-        <div>
-          <dt>Local states</dt>
-          <dd>{localStateCount}</dd>
-        </div>
-        <div>
-          <dt>Transitions</dt>
-          <dd>{transitionCount}</dd>
-        </div>
-        <div>
-          <dt>Property monitor</dt>
-          <dd>{variant.property ? "Included" : "None"}</dd>
-        </div>
-      </dl>
-
-      <div className="process-inventory">
-        {variant.machines.map((machine, index) => (
-          <article key={`${variant.id}-${machine.name}`}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <h3>{sketch.processes[index]?.name ?? machine.name}</h3>
-              <p>
-                Initial state {machine.initial} · {machine.alphabet.length} actions ·{" "}
-                {machine.transitions.length} transitions
-              </p>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <p className="next-slice-note">
-        Interactive state graphs and event stepping will be added in the next slice.
-      </p>
     </div>
   );
 }
@@ -413,7 +343,14 @@ function WorkspacePage() {
               project &&
               selectedVariant &&
               isConfirmed ? (
-              <FormalModelPreview project={project} variantId={selectedVariant.id} />
+              <Suspense
+                fallback={<div className="graph-status">Loading process playground…</div>}
+              >
+                <LtsPlayground
+                  project={project}
+                  variantId={selectedVariant.id}
+                />
+              </Suspense>
             ) : (
               <EmptyPreview tab={activeTab} />
             )}

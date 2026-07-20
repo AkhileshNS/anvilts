@@ -17,6 +17,7 @@
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",
     "@excalidraw/mermaid-to-excalidraw": "^2.2.2",
+    "@viz-js/viz": "^3.28.0",
     "commander": "^15.0.0",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
