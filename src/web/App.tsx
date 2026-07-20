@@ -25,6 +25,11 @@ const LtsPlayground = lazy(() =>
     default: module.LtsPlayground,
   })),
 );
+const VerificationView = lazy(() =>
+  import("./VerificationView").then((module) => ({
+    default: module.VerificationView,
+  })),
+);
 
 const TABS = ["Whiteboard", "Processes", "Verification"] as const;
 
@@ -347,6 +352,18 @@ function WorkspacePage() {
                 fallback={<div className="graph-status">Loading process playground…</div>}
               >
                 <LtsPlayground
+                  project={project}
+                  variantId={selectedVariant.id}
+                />
+              </Suspense>
+            ) : activeTab === "Verification" &&
+              project &&
+              selectedVariant &&
+              isConfirmed ? (
+              <Suspense
+                fallback={<div className="graph-status">Running verification…</div>}
+              >
+                <VerificationView
                   project={project}
                   variantId={selectedVariant.id}
                 />
