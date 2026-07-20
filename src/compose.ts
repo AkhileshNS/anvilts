@@ -2,6 +2,7 @@ import { exploreReachable } from "./reachability.ts";
 import {
   END_STATE,
   NO_END,
+  TAU,
   statesEqual,
   type State,
   type StateMachine,
@@ -56,6 +57,9 @@ export function composeStateMachines(
   const terminatingMachineIndexes = machines.flatMap((machine, index) =>
     machine.end !== NO_END ? [index] : [],
   );
+  const nonTerminatingMachineIndexes = machines.flatMap((machine, index) =>
+    machine.end === NO_END ? [index] : [],
+  );
   const terminatingAlphabet = new Set(
     terminatingMachineIndexes.flatMap((index) => machines[index]!.alphabet),
   );
@@ -64,7 +68,9 @@ export function composeStateMachines(
     machines.every(
       (machine) =>
         machine.end !== NO_END ||
-        machine.alphabet.every((action) => terminatingAlphabet.has(action)),
+        machine.alphabet.every(
+          (action) => action === TAU || terminatingAlphabet.has(action),
+        ),
     );
 
   function isCompositeEnd(state: CompositeState): boolean {
@@ -72,6 +78,10 @@ export function composeStateMachines(
       canTerminate &&
       terminatingMachineIndexes.every((index) =>
         statesEqual(state[index]!, machines[index]!.end),
+      ) &&
+      nonTerminatingMachineIndexes.every(
+        (index) =>
+          enabledTransitions(machines[index]!, state[index]!, TAU).length === 0,
       )
     );
   }
@@ -86,6 +96,29 @@ export function composeStateMachines(
     const eligible: Transition<CompositeMachineState>[] = [];
 
     for (const action of alphabet) {
+      if (action === TAU) {
+        for (const [machineIndex, machine] of machines.entries()) {
+          const localTransitions = enabledTransitions(
+            machine,
+            compositeState[machineIndex]!,
+            TAU,
+          );
+
+          for (const transition of localTransitions) {
+            const target = [...compositeState];
+            target[machineIndex] = transition.to;
+
+            eligible.push({
+              from: [...compositeState],
+              action: TAU,
+              to: isCompositeEnd(target) ? END_STATE : target,
+            });
+          }
+        }
+
+        continue;
+      }
+
       const participatingMachines = participants.get(action) ?? [];
       const enabledByParticipant = participatingMachines.map((index) =>
         enabledTransitions(machines[index]!, compositeState[index]!, action),

@@ -1,5 +1,6 @@
 export const NO_END = -1;
 export const END_STATE = "END";
+export const TAU = "tau";
 
 export type State = number | typeof END_STATE | State[];
 
