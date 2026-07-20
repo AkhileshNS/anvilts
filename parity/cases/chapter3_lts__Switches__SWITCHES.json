@@ -1,0 +1,81 @@
+{
+  "name": "chapter3_lts__Switches__SWITCHES",
+  "inputs": [
+    {
+      "name": "s.1:SWITCH",
+      "alphabet": [
+        "s.1.on",
+        "s.1.off"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "s.1.on",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "s.1.off",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "s.2:SWITCH",
+      "alphabet": [
+        "s.2.on",
+        "s.2.off"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "s.2.on",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "s.2.off",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "s.3:SWITCH",
+      "alphabet": [
+        "s.3.on",
+        "s.3.off"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "s.3.on",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "s.3.off",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/Switches.lts",
+    "process": "SWITCHES",
+    "componentCount": 3,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 8,
+      "transitions": 24
+    },
+    "deadlockTrace": []
+  }
+}

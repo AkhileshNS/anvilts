@@ -1,0 +1,147 @@
+{
+  "name": "chapter10_lts__Port_recursive__PORT",
+  "inputs": [
+    {
+      "name": "BUFFER",
+      "alphabet": [
+        "receive.7",
+        "receive.6",
+        "receive.5",
+        "receive.0",
+        "receive.4",
+        "receive.3",
+        "receive.2",
+        "receive.1",
+        "send.7",
+        "send.6",
+        "send.5",
+        "send.4",
+        "send.0",
+        "send.3",
+        "send.2",
+        "send.1",
+        "send.9",
+        "send.8",
+        "receive.9",
+        "receive.8"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "receive.7",
+          "to": 0
+        },
+        {
+          "from": 4,
+          "action": "receive.6",
+          "to": 0
+        },
+        {
+          "from": 5,
+          "action": "receive.5",
+          "to": 0
+        },
+        {
+          "from": 10,
+          "action": "receive.0",
+          "to": 0
+        },
+        {
+          "from": 6,
+          "action": "receive.4",
+          "to": 0
+        },
+        {
+          "from": 7,
+          "action": "receive.3",
+          "to": 0
+        },
+        {
+          "from": 8,
+          "action": "receive.2",
+          "to": 0
+        },
+        {
+          "from": 9,
+          "action": "receive.1",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "send.7",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "send.6",
+          "to": 4
+        },
+        {
+          "from": 0,
+          "action": "send.5",
+          "to": 5
+        },
+        {
+          "from": 0,
+          "action": "send.4",
+          "to": 6
+        },
+        {
+          "from": 0,
+          "action": "send.0",
+          "to": 10
+        },
+        {
+          "from": 0,
+          "action": "send.3",
+          "to": 7
+        },
+        {
+          "from": 0,
+          "action": "send.2",
+          "to": 8
+        },
+        {
+          "from": 0,
+          "action": "send.1",
+          "to": 9
+        },
+        {
+          "from": 0,
+          "action": "send.9",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "send.8",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "receive.9",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "receive.8",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter10_lts/Port_recursive.lts",
+    "process": "PORT",
+    "componentCount": 1,
+    "exactCounts": false,
+    "expectedComposite": {
+      "states": 11,
+      "transitions": 20
+    },
+    "deadlockTrace": []
+  }
+}

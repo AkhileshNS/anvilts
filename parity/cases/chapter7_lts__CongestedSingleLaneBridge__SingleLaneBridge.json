@@ -1,0 +1,460 @@
+{
+  "name": "chapter7_lts__CongestedSingleLaneBridge__SingleLaneBridge",
+  "inputs": [
+    {
+      "name": "CARS.red:CONVOY.1:CAR",
+      "alphabet": [
+        "red.1.enter",
+        "red.1.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "red.1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "red.1.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.red:CONVOY.2:CAR",
+      "alphabet": [
+        "red.2.enter",
+        "red.2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "red.2.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "red.2.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.red:CONVOY.NOPASS1",
+      "alphabet": [
+        "red.1.enter",
+        "red.2.enter"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "red.1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "red.2.enter",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.red:CONVOY.NOPASS2",
+      "alphabet": [
+        "red.1.exit",
+        "red.2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "red.1.exit",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "red.2.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.blue:CONVOY.1:CAR",
+      "alphabet": [
+        "blue.1.enter",
+        "blue.1.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "blue.1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "blue.1.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.blue:CONVOY.2:CAR",
+      "alphabet": [
+        "blue.2.enter",
+        "blue.2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "blue.2.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "blue.2.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.blue:CONVOY.NOPASS1",
+      "alphabet": [
+        "blue.1.enter",
+        "blue.2.enter"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "blue.1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "blue.2.enter",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARS.blue:CONVOY.NOPASS2",
+      "alphabet": [
+        "blue.1.exit",
+        "blue.2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "blue.1.exit",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "blue.2.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "BRIDGE",
+      "alphabet": [
+        "red.1.enter",
+        "red.2.enter",
+        "blue.1.exit",
+        "blue.2.exit",
+        "red.1.exit",
+        "red.2.exit",
+        "blue.1.enter",
+        "blue.2.enter"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "red.1.enter",
+          "to": 4
+        },
+        {
+          "from": 3,
+          "action": "red.2.enter",
+          "to": 4
+        },
+        {
+          "from": 3,
+          "action": "blue.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 3,
+          "action": "blue.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 3,
+          "action": "red.1.exit",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "red.2.exit",
+          "to": 0
+        },
+        {
+          "from": 4,
+          "action": "red.1.exit",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "red.2.exit",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "red.1.enter",
+          "to": "ERROR"
+        },
+        {
+          "from": 4,
+          "action": "red.2.enter",
+          "to": "ERROR"
+        },
+        {
+          "from": 4,
+          "action": "blue.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 4,
+          "action": "blue.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "red.1.enter",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "red.2.enter",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "red.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "red.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "blue.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "blue.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "blue.1.enter",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "blue.2.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "red.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "red.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "blue.1.exit",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "blue.2.exit",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "blue.1.enter",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "blue.2.enter",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "red.1.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 2,
+          "action": "red.2.exit",
+          "to": "ERROR"
+        },
+        {
+          "from": 2,
+          "action": "blue.1.enter",
+          "to": "ERROR"
+        },
+        {
+          "from": 2,
+          "action": "blue.2.enter",
+          "to": "ERROR"
+        },
+        {
+          "from": 2,
+          "action": "blue.1.exit",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "blue.2.exit",
+          "to": 1
+        }
+      ]
+    }
+  ],
+  "property": {
+    "name": "ONEWAY",
+    "alphabet": [
+      "red.1.enter",
+      "red.2.enter",
+      "blue.1.enter",
+      "blue.2.enter",
+      "blue.1.exit",
+      "blue.2.exit",
+      "red.1.exit",
+      "red.2.exit"
+    ],
+    "initial": 0,
+    "end": -1,
+    "transitions": [
+      {
+        "from": 3,
+        "action": "red.1.enter",
+        "to": 4
+      },
+      {
+        "from": 3,
+        "action": "red.2.enter",
+        "to": 4
+      },
+      {
+        "from": 3,
+        "action": "red.1.exit",
+        "to": 0
+      },
+      {
+        "from": 3,
+        "action": "red.2.exit",
+        "to": 0
+      },
+      {
+        "from": 4,
+        "action": "red.1.exit",
+        "to": 3
+      },
+      {
+        "from": 4,
+        "action": "red.2.exit",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "red.1.enter",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "red.2.enter",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "blue.1.enter",
+        "to": 1
+      },
+      {
+        "from": 0,
+        "action": "blue.2.enter",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "blue.1.exit",
+        "to": 0
+      },
+      {
+        "from": 1,
+        "action": "blue.2.exit",
+        "to": 0
+      },
+      {
+        "from": 1,
+        "action": "blue.1.enter",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "blue.2.enter",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "blue.1.exit",
+        "to": 1
+      },
+      {
+        "from": 2,
+        "action": "blue.2.exit",
+        "to": 1
+      }
+    ]
+  },
+  "output": "no property violation",
+  "meta": {
+    "category": "safety",
+    "source": "example/chapter7_lts/CongestedSingleLaneBridge.lts",
+    "process": "SingleLaneBridge",
+    "propertyName": "ONEWAY",
+    "componentCount": 9,
+    "expectedComposite": {
+      "states": 20,
+      "transitions": 32
+    },
+    "violationTrace": []
+  }
+}

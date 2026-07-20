@@ -1,0 +1,60 @@
+{
+  "name": "chapter3_lts__Switches__TWO_SWITCH",
+  "inputs": [
+    {
+      "name": "a:SWITCH",
+      "alphabet": [
+        "a.on",
+        "a.off"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "a.on",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "a.off",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "b:SWITCH",
+      "alphabet": [
+        "b.on",
+        "b.off"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "b.on",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "b.off",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/Switches.lts",
+    "process": "TWO_SWITCH",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 4,
+      "transitions": 8
+    },
+    "deadlockTrace": []
+  }
+}

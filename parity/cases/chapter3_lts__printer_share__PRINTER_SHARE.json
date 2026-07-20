@@ -1,0 +1,105 @@
+{
+  "name": "chapter3_lts__printer_share__PRINTER_SHARE",
+  "inputs": [
+    {
+      "name": "a:USER",
+      "alphabet": [
+        "a.printer.acquire",
+        "a.use",
+        "a.printer.release"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "a.printer.acquire",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "a.use",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "a.printer.release",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "b:USER",
+      "alphabet": [
+        "b.printer.acquire",
+        "b.use",
+        "b.printer.release"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "b.printer.acquire",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "b.use",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "b.printer.release",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "{a,b}::printer:RESOURCE",
+      "alphabet": [
+        "a.printer.acquire",
+        "b.printer.acquire",
+        "a.printer.release",
+        "b.printer.release"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "a.printer.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "b.printer.acquire",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "a.printer.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "b.printer.release",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/printer_share.lts",
+    "process": "PRINTER_SHARE",
+    "componentCount": 3,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 5,
+      "transitions": 6
+    },
+    "deadlockTrace": []
+  }
+}

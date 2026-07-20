@@ -1,0 +1,58 @@
+{
+  "name": "chapter3_lts__itch_scratch__CONVERSE_ITCH",
+  "inputs": [
+    {
+      "name": "ITCH",
+      "alphabet": [
+        "scratch"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "scratch",
+          "to": 1
+        }
+      ]
+    },
+    {
+      "name": "CONVERSE",
+      "alphabet": [
+        "think",
+        "talk"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "think",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "talk",
+          "to": 2
+        }
+      ]
+    }
+  ],
+  "output": "deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/itch_scratch.lts",
+    "process": "CONVERSE_ITCH",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 6,
+      "transitions": 7
+    },
+    "deadlockTrace": [
+      "scratch",
+      "think",
+      "talk"
+    ]
+  }
+}

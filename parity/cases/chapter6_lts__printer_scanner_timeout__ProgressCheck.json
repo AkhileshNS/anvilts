@@ -1,0 +1,184 @@
+{
+  "name": "chapter6_lts__printer_scanner_timeout__ProgressCheck",
+  "inputs": [
+    {
+      "name": "SYS.p:P",
+      "alphabet": [
+        "p.copy",
+        "p.printer.put",
+        "p.scanner.put",
+        "p.printer.get",
+        "p.scanner.get",
+        "p.timeout"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "p.copy",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "p.printer.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "p.scanner.put",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "p.printer.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.scanner.get",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "p.timeout",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "p.printer.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "SYS.q:Q",
+      "alphabet": [
+        "q.copy",
+        "q.printer.put",
+        "q.scanner.put",
+        "q.scanner.get",
+        "q.printer.get",
+        "q.timeout"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "q.copy",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "q.printer.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "q.scanner.put",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "q.scanner.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "q.printer.get",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "q.timeout",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "q.scanner.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "SYS.{p,q}::printer:RESOURCE",
+      "alphabet": [
+        "p.printer.get",
+        "q.printer.get",
+        "p.printer.put",
+        "q.printer.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "p.printer.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "q.printer.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.printer.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "q.printer.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "SYS.{p,q}::scanner:RESOURCE",
+      "alphabet": [
+        "p.scanner.get",
+        "q.scanner.get",
+        "p.scanner.put",
+        "q.scanner.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "p.scanner.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "q.scanner.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.scanner.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "q.scanner.put",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter6_lts/printer-scanner-timeout.lts",
+    "process": "ProgressCheck",
+    "componentCount": 4,
+    "exactCounts": false,
+    "expectedComposite": {
+      "states": 8,
+      "transitions": 12
+    },
+    "deadlockTrace": []
+  }
+}

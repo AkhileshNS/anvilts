@@ -1,0 +1,72 @@
+{
+  "name": "chapter3_lts__client_server__CLIENT_SERVER",
+  "inputs": [
+    {
+      "name": "CLIENT",
+      "alphabet": [
+        "call",
+        "reply",
+        "continue"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "call",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reply",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "continue",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "SERVER",
+      "alphabet": [
+        "call",
+        "service",
+        "reply"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "call",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "service",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reply",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/client_server.lts",
+    "process": "CLIENT_SERVER",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 4,
+      "transitions": 4
+    },
+    "deadlockTrace": []
+  }
+}

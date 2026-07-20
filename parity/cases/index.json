@@ -1,0 +1,423 @@
+{
+  "count": 52,
+  "deadlock": 44,
+  "safety": 8,
+  "cases": [
+    {
+      "name": "chapter10_lts__Port_recursive__APORT",
+      "file": "chapter10_lts__Port_recursive__APORT.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter10_lts/Port_recursive.lts",
+      "process": "APORT"
+    },
+    {
+      "name": "chapter10_lts__Port_recursive__PORT",
+      "file": "chapter10_lts__Port_recursive__PORT.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter10_lts/Port_recursive.lts",
+      "process": "PORT"
+    },
+    {
+      "name": "chapter10_lts__Port_recursive__SYS",
+      "file": "chapter10_lts__Port_recursive__SYS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter10_lts/Port_recursive.lts",
+      "process": "SYS"
+    },
+    {
+      "name": "chapter10_lts__SynchMsgAdditionallts__SYS",
+      "file": "chapter10_lts__SynchMsgAdditionallts__SYS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter10_lts/SynchMsgAdditionallts.lts",
+      "process": "SYS"
+    },
+    {
+      "name": "chapter10_lts__SynchMsgDemo__SyncMsg",
+      "file": "chapter10_lts__SynchMsgDemo__SyncMsg.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter10_lts/SynchMsgDemo.lts",
+      "process": "SyncMsg"
+    },
+    {
+      "name": "chapter11_lts__Primes__PRIMES",
+      "file": "chapter11_lts__Primes__PRIMES.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter11_lts/Primes.lts",
+      "process": "PRIMES"
+    },
+    {
+      "name": "chapter11_lts__Primes__PRIMESUNBUF",
+      "file": "chapter11_lts__Primes__PRIMESUNBUF.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter11_lts/Primes.lts",
+      "process": "PRIMESUNBUF"
+    },
+    {
+      "name": "chapter12_lts__Maximal_progress__CHECK",
+      "file": "chapter12_lts__Maximal_progress__CHECK.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter12_lts/Maximal_progress.lts",
+      "process": "CHECK"
+    },
+    {
+      "name": "chapter12_lts__Maximal_progress__CHECK2",
+      "file": "chapter12_lts__Maximal_progress__CHECK2.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter12_lts/Maximal_progress.lts",
+      "process": "CHECK2"
+    },
+    {
+      "name": "chapter12_lts__Timed_producer_consumer__FASTER",
+      "file": "chapter12_lts__Timed_producer_consumer__FASTER.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter12_lts/Timed_producer_consumer.lts",
+      "process": "FASTER"
+    },
+    {
+      "name": "chapter12_lts__Timed_producer_consumer__SAME",
+      "file": "chapter12_lts__Timed_producer_consumer__SAME.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter12_lts/Timed_producer_consumer.lts",
+      "process": "SAME"
+    },
+    {
+      "name": "chapter12_lts__Timed_producer_consumer__SLOWER",
+      "file": "chapter12_lts__Timed_producer_consumer__SLOWER.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter12_lts/Timed_producer_consumer.lts",
+      "process": "SLOWER"
+    },
+    {
+      "name": "chapter12_lts__Timeout__RECEIVER",
+      "file": "chapter12_lts__Timeout__RECEIVER.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter12_lts/Timeout.lts",
+      "process": "RECEIVER"
+    },
+    {
+      "name": "chapter13_lts__bufferimpl__BUFFERMON",
+      "file": "chapter13_lts__bufferimpl__BUFFERMON.json",
+      "category": "safety",
+      "output": "property violation",
+      "source": "example/chapter13_lts/bufferimpl.lts",
+      "process": "BUFFERMON"
+    },
+    {
+      "name": "chapter13_lts__notify_wait__WAITSET",
+      "file": "chapter13_lts__notify_wait__WAITSET.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter13_lts/notify_wait.lts",
+      "process": "WAITSET"
+    },
+    {
+      "name": "chapter13_lts__readwritepriorimpl__RWPRIORMON",
+      "file": "chapter13_lts__readwritepriorimpl__RWPRIORMON.json",
+      "category": "safety",
+      "output": "property violation",
+      "source": "example/chapter13_lts/readwritepriorimpl.lts",
+      "process": "RWPRIORMON"
+    },
+    {
+      "name": "chapter14_lts__SingleLaneBridge_fluent__CARS",
+      "file": "chapter14_lts__SingleLaneBridge_fluent__CARS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter14_lts/SingleLaneBridge_fluent.lts",
+      "process": "CARS"
+    },
+    {
+      "name": "chapter14_lts__SingleLaneBridge_fluent__CONVOY",
+      "file": "chapter14_lts__SingleLaneBridge_fluent__CONVOY.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter14_lts/SingleLaneBridge_fluent.lts",
+      "process": "CONVOY"
+    },
+    {
+      "name": "chapter3_lts__Bill_ben__BILL_BEN",
+      "file": "chapter3_lts__Bill_ben__BILL_BEN.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter3_lts/Bill_ben.lts",
+      "process": "BILL_BEN"
+    },
+    {
+      "name": "chapter3_lts__client_server__CLIENT_SERVER",
+      "file": "chapter3_lts__client_server__CLIENT_SERVER.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/client_server.lts",
+      "process": "CLIENT_SERVER"
+    },
+    {
+      "name": "chapter3_lts__client_serverv2__CLIENT_SERVERv2",
+      "file": "chapter3_lts__client_serverv2__CLIENT_SERVERv2.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/client_serverv2.lts",
+      "process": "CLIENT_SERVERv2"
+    },
+    {
+      "name": "chapter3_lts__clock_radio__CLOCK_RADIO",
+      "file": "chapter3_lts__clock_radio__CLOCK_RADIO.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/clock_radio.lts",
+      "process": "CLOCK_RADIO"
+    },
+    {
+      "name": "chapter3_lts__Factory__FACTORY",
+      "file": "chapter3_lts__Factory__FACTORY.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/Factory.lts",
+      "process": "FACTORY"
+    },
+    {
+      "name": "chapter3_lts__itch_scratch__CONVERSE_ITCH",
+      "file": "chapter3_lts__itch_scratch__CONVERSE_ITCH.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter3_lts/itch_scratch.lts",
+      "process": "CONVERSE_ITCH"
+    },
+    {
+      "name": "chapter3_lts__maker_user__MAKER_USER",
+      "file": "chapter3_lts__maker_user__MAKER_USER.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/maker_user.lts",
+      "process": "MAKER_USER"
+    },
+    {
+      "name": "chapter3_lts__maker_userv2__MAKER_USERv2",
+      "file": "chapter3_lts__maker_userv2__MAKER_USERv2.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/maker_userv2.lts",
+      "process": "MAKER_USERv2"
+    },
+    {
+      "name": "chapter3_lts__printer_share__PRINTER_SHARE",
+      "file": "chapter3_lts__printer_share__PRINTER_SHARE.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/printer_share.lts",
+      "process": "PRINTER_SHARE"
+    },
+    {
+      "name": "chapter3_lts__resource_share__RESOURCE_SHARE",
+      "file": "chapter3_lts__resource_share__RESOURCE_SHARE.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/resource_share.lts",
+      "process": "RESOURCE_SHARE"
+    },
+    {
+      "name": "chapter3_lts__Switches__SWITCHES",
+      "file": "chapter3_lts__Switches__SWITCHES.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/Switches.lts",
+      "process": "SWITCHES"
+    },
+    {
+      "name": "chapter3_lts__Switches__TWO_SWITCH",
+      "file": "chapter3_lts__Switches__TWO_SWITCH.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/Switches.lts",
+      "process": "TWO_SWITCH"
+    },
+    {
+      "name": "chapter3_lts__thread_demo__THREAD_DEMO",
+      "file": "chapter3_lts__thread_demo__THREAD_DEMO.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter3_lts/thread_demo.lts",
+      "process": "THREAD_DEMO"
+    },
+    {
+      "name": "chapter3_lts__Twobuff__TWOBUF",
+      "file": "chapter3_lts__Twobuff__TWOBUF.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter3_lts/Twobuff.lts",
+      "process": "TWOBUF"
+    },
+    {
+      "name": "chapter5_lts__BoundedBuffer__BOUNDEDBUFFER",
+      "file": "chapter5_lts__BoundedBuffer__BOUNDEDBUFFER.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter5_lts/BoundedBuffer.lts",
+      "process": "BOUNDEDBUFFER"
+    },
+    {
+      "name": "chapter5_lts__Carpark__CARPARK",
+      "file": "chapter5_lts__Carpark__CARPARK.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter5_lts/Carpark.lts",
+      "process": "CARPARK"
+    },
+    {
+      "name": "chapter6_lts__DeadlockFreePhilosophers__DINERS",
+      "file": "chapter6_lts__DeadlockFreePhilosophers__DINERS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter6_lts/DeadlockFreePhilosophers.lts",
+      "process": "DINERS"
+    },
+    {
+      "name": "chapter6_lts__DiningPhilosophers__DINERS",
+      "file": "chapter6_lts__DiningPhilosophers__DINERS.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter6_lts/DiningPhilosophers.lts",
+      "process": "DINERS"
+    },
+    {
+      "name": "chapter6_lts__Maze__GETOUT",
+      "file": "chapter6_lts__Maze__GETOUT.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter6_lts/Maze.lts",
+      "process": "GETOUT"
+    },
+    {
+      "name": "chapter6_lts__printer_scanner__SYS",
+      "file": "chapter6_lts__printer_scanner__SYS.json",
+      "category": "deadlock",
+      "output": "deadlock",
+      "source": "example/chapter6_lts/printer-scanner.lts",
+      "process": "SYS"
+    },
+    {
+      "name": "chapter6_lts__printer_scanner_reorder__SYS",
+      "file": "chapter6_lts__printer_scanner_reorder__SYS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter6_lts/printer-scanner-reorder.lts",
+      "process": "SYS"
+    },
+    {
+      "name": "chapter6_lts__printer_scanner_timeout__ProgressCheck",
+      "file": "chapter6_lts__printer_scanner_timeout__ProgressCheck.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter6_lts/printer-scanner-timeout.lts",
+      "process": "ProgressCheck"
+    },
+    {
+      "name": "chapter6_lts__printer_scanner_timeout__SYS",
+      "file": "chapter6_lts__printer_scanner_timeout__SYS.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter6_lts/printer-scanner-timeout.lts",
+      "process": "SYS"
+    },
+    {
+      "name": "chapter7_lts__CongestedSingleLaneBridge__SingleLaneBridge",
+      "file": "chapter7_lts__CongestedSingleLaneBridge__SingleLaneBridge.json",
+      "category": "safety",
+      "output": "no property violation",
+      "source": "example/chapter7_lts/CongestedSingleLaneBridge.lts",
+      "process": "SingleLaneBridge"
+    },
+    {
+      "name": "chapter7_lts__High_low__HIGH",
+      "file": "chapter7_lts__High_low__HIGH.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter7_lts/High_low.lts",
+      "process": "HIGH"
+    },
+    {
+      "name": "chapter7_lts__High_low__LOW",
+      "file": "chapter7_lts__High_low__LOW.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter7_lts/High_low.lts",
+      "process": "LOW"
+    },
+    {
+      "name": "chapter7_lts__Mutex_property__CHECK",
+      "file": "chapter7_lts__Mutex_property__CHECK.json",
+      "category": "safety",
+      "output": "no property violation",
+      "source": "example/chapter7_lts/Mutex_property.lts",
+      "process": "CHECK"
+    },
+    {
+      "name": "chapter7_lts__SingleLaneBridge__SingleLaneBridge",
+      "file": "chapter7_lts__SingleLaneBridge__SingleLaneBridge.json",
+      "category": "safety",
+      "output": "no property violation",
+      "source": "example/chapter7_lts/SingleLaneBridge.lts",
+      "process": "SingleLaneBridge"
+    },
+    {
+      "name": "chapter7_lts__SingleLaneBridgeFair__SingleLaneBridge",
+      "file": "chapter7_lts__SingleLaneBridgeFair__SingleLaneBridge.json",
+      "category": "safety",
+      "output": "no property violation",
+      "source": "example/chapter7_lts/SingleLaneBridgeFair.lts",
+      "process": "SingleLaneBridge"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__RUN",
+      "file": "chapter7_lts__Twocoin__RUN.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "RUN"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__TC",
+      "file": "chapter7_lts__Twocoin__TC.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "TC"
+    },
+    {
+      "name": "chapter8_lts__CruiseControl__CONTROL",
+      "file": "chapter8_lts__CruiseControl__CONTROL.json",
+      "category": "safety",
+      "output": "property violation",
+      "source": "example/chapter8_lts/CruiseControl.lts",
+      "process": "CONTROL"
+    },
+    {
+      "name": "chapter8_lts__RevisedCruiseControl__CONTROL",
+      "file": "chapter8_lts__RevisedCruiseControl__CONTROL.json",
+      "category": "safety",
+      "output": "no property violation",
+      "source": "example/chapter8_lts/RevisedCruiseControl.lts",
+      "process": "CONTROL"
+    },
+    {
+      "name": "chapter9_lts__MasterSlave__MASTER_SLAVE",
+      "file": "chapter9_lts__MasterSlave__MASTER_SLAVE.json",
+      "category": "deadlock",
+      "output": "no deadlock",
+      "source": "example/chapter9_lts/MasterSlave.lts",
+      "process": "MASTER_SLAVE"
+    }
+  ]
+}

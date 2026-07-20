@@ -1,0 +1,64 @@
+{
+  "name": "chapter3_lts__Bill_ben__BILL_BEN",
+  "inputs": [
+    {
+      "name": "BILL",
+      "alphabet": [
+        "play",
+        "meet"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "play",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "meet",
+          "to": 2
+        }
+      ]
+    },
+    {
+      "name": "BEN",
+      "alphabet": [
+        "work",
+        "meet"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "work",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "meet",
+          "to": 2
+        }
+      ]
+    }
+  ],
+  "output": "deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/Bill_ben.lts",
+    "process": "BILL_BEN",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 5,
+      "transitions": 5
+    },
+    "deadlockTrace": [
+      "play",
+      "work",
+      "meet"
+    ]
+  }
+}

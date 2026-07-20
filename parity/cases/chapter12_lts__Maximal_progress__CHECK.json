@@ -1,0 +1,50 @@
+{
+  "name": "chapter12_lts__Maximal_progress__CHECK",
+  "inputs": [
+    {
+      "name": "PROG",
+      "alphabet": [
+        "tick",
+        "start",
+        "compute"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "tick",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "start",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "tick",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "compute",
+          "to": 1
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter12_lts/Maximal_progress.lts",
+    "process": "CHECK",
+    "componentCount": 1,
+    "exactCounts": false,
+    "expectedComposite": {
+      "states": 2,
+      "transitions": 2
+    },
+    "deadlockTrace": []
+  }
+}

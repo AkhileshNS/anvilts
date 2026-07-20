@@ -1,0 +1,99 @@
+{
+  "name": "chapter3_lts__Factory__FACTORY",
+  "inputs": [
+    {
+      "name": "MAKE_A",
+      "alphabet": [
+        "makeA",
+        "ready",
+        "used"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "makeA",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "ready",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "used",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "MAKE_B",
+      "alphabet": [
+        "makeB",
+        "ready",
+        "used"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "makeB",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "ready",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "used",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "ASSEMBLE",
+      "alphabet": [
+        "ready",
+        "assemble",
+        "used"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "ready",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "assemble",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "used",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/Factory.lts",
+    "process": "FACTORY",
+    "componentCount": 3,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 6,
+      "transitions": 7
+    },
+    "deadlockTrace": []
+  }
+}

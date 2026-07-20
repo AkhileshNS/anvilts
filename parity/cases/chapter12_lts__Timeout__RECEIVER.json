@@ -1,0 +1,115 @@
+{
+  "name": "chapter12_lts__Timeout__RECEIVER",
+  "inputs": [
+    {
+      "name": "RECEIVE",
+      "alphabet": [
+        "resetTO",
+        "start",
+        "setTO",
+        "receive",
+        "timeout"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "resetTO",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "start",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "setTO",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "receive",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "timeout",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "TIMEOUT(2)",
+      "alphabet": [
+        "resetTO",
+        "timeout",
+        "tick",
+        "setTO"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "resetTO",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "timeout",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "tick",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "resetTO",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "setTO",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "resetTO",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "tick",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "tick",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "resetTO",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter12_lts/Timeout.lts",
+    "process": "RECEIVER",
+    "componentCount": 2,
+    "exactCounts": false,
+    "expectedComposite": {
+      "states": 8,
+      "transitions": 12
+    },
+    "deadlockTrace": []
+  }
+}

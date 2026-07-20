@@ -1,0 +1,60 @@
+{
+  "name": "chapter3_lts__maker_user__MAKER_USER",
+  "inputs": [
+    {
+      "name": "MAKER",
+      "alphabet": [
+        "make",
+        "ready"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "make",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "ready",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "USER",
+      "alphabet": [
+        "ready",
+        "use"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "ready",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "use",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/maker_user.lts",
+    "process": "MAKER_USER",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 4,
+      "transitions": 5
+    },
+    "deadlockTrace": []
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "name": "chapter10_lts__SynchMsgAdditionallts__SYS",
+  "inputs": [
+    {
+      "name": "SEND",
+      "alphabet": [
+        "chan.3"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "chan.3",
+          "to": 1
+        }
+      ]
+    },
+    {
+      "name": "RECEIVE",
+      "alphabet": [
+        "received.2",
+        "received.1",
+        "received.0",
+        "chan.2",
+        "chan.1",
+        "chan.0",
+        "chan.4",
+        "chan.3",
+        "received.4",
+        "received.3"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "received.2",
+          "to": 0
+        },
+        {
+          "from": 4,
+          "action": "received.1",
+          "to": 0
+        },
+        {
+          "from": 5,
+          "action": "received.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "chan.2",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "chan.1",
+          "to": 4
+        },
+        {
+          "from": 0,
+          "action": "chan.0",
+          "to": 5
+        },
+        {
+          "from": 0,
+          "action": "chan.4",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "chan.3",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "received.4",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "received.3",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter10_lts/SynchMsgAdditionallts.lts",
+    "process": "SYS",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 11,
+      "transitions": 18
+    },
+    "deadlockTrace": []
+  }
+}

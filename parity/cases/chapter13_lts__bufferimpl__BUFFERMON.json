@@ -1,0 +1,982 @@
+{
+  "name": "chapter13_lts__bufferimpl__BUFFERMON",
+  "inputs": [
+    {
+      "name": "{prod.1,prod.2,cons.1,cons.2}::LOCK",
+      "alphabet": [
+        "prod.1.acquire",
+        "prod.2.acquire",
+        "cons.1.acquire",
+        "cons.2.acquire",
+        "prod.1.release",
+        "prod.2.release",
+        "cons.1.release",
+        "cons.2.release"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "prod.1.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "prod.2.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.1.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.2.acquire",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.1.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "prod.2.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.1.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.2.release",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.prod.1:ELEMENT",
+      "alphabet": [
+        "unblockAll",
+        "prod.1.wait",
+        "prod.1.unblock",
+        "prod.1.endwait"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.1.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "prod.1.unblock",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "prod.1.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.prod.2:ELEMENT",
+      "alphabet": [
+        "unblockAll",
+        "prod.2.wait",
+        "prod.2.unblock",
+        "prod.2.endwait"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "prod.2.unblock",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "prod.2.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.cons.1:ELEMENT",
+      "alphabet": [
+        "unblockAll",
+        "cons.1.wait",
+        "cons.1.unblock",
+        "cons.1.endwait"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.1.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "cons.1.unblock",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "cons.1.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.cons.2:ELEMENT",
+      "alphabet": [
+        "unblockAll",
+        "cons.2.wait",
+        "cons.2.unblock",
+        "cons.2.endwait"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "cons.2.unblock",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "cons.2.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.{prod.1,prod.2,cons.1,cons.2}::CONTROL",
+      "alphabet": [
+        "unblockAll",
+        "prod.1.notifyAll",
+        "prod.2.notifyAll",
+        "cons.1.notifyAll",
+        "cons.2.notifyAll",
+        "prod.1.notify",
+        "prod.2.notify",
+        "cons.1.notify",
+        "cons.2.notify",
+        "prod.1.wait",
+        "prod.2.wait",
+        "cons.1.wait",
+        "cons.2.wait",
+        "prod.1.unblock",
+        "prod.2.unblock",
+        "cons.1.unblock",
+        "cons.2.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 4,
+          "action": "prod.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "prod.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "cons.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "cons.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "prod.1.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "prod.2.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "cons.1.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "cons.2.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "prod.1.wait",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "prod.2.wait",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "cons.1.wait",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "cons.2.wait",
+          "to": 6
+        },
+        {
+          "from": 5,
+          "action": "prod.1.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "prod.2.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "cons.1.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "cons.2.unblock",
+          "to": 1
+        },
+        {
+          "from": 6,
+          "action": "prod.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 6,
+          "action": "prod.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 6,
+          "action": "cons.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 6,
+          "action": "cons.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 6,
+          "action": "prod.1.notify",
+          "to": 7
+        },
+        {
+          "from": 6,
+          "action": "prod.2.notify",
+          "to": 7
+        },
+        {
+          "from": 6,
+          "action": "cons.1.notify",
+          "to": 7
+        },
+        {
+          "from": 6,
+          "action": "cons.2.notify",
+          "to": 7
+        },
+        {
+          "from": 6,
+          "action": "prod.1.wait",
+          "to": 8
+        },
+        {
+          "from": 6,
+          "action": "prod.2.wait",
+          "to": 8
+        },
+        {
+          "from": 6,
+          "action": "cons.1.wait",
+          "to": 8
+        },
+        {
+          "from": 6,
+          "action": "cons.2.wait",
+          "to": 8
+        },
+        {
+          "from": 7,
+          "action": "prod.1.unblock",
+          "to": 4
+        },
+        {
+          "from": 7,
+          "action": "prod.2.unblock",
+          "to": 4
+        },
+        {
+          "from": 7,
+          "action": "cons.1.unblock",
+          "to": 4
+        },
+        {
+          "from": 7,
+          "action": "cons.2.unblock",
+          "to": 4
+        },
+        {
+          "from": 8,
+          "action": "prod.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 8,
+          "action": "prod.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 8,
+          "action": "cons.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 8,
+          "action": "cons.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 8,
+          "action": "prod.1.notify",
+          "to": 9
+        },
+        {
+          "from": 8,
+          "action": "prod.2.notify",
+          "to": 9
+        },
+        {
+          "from": 8,
+          "action": "cons.1.notify",
+          "to": 9
+        },
+        {
+          "from": 8,
+          "action": "cons.2.notify",
+          "to": 9
+        },
+        {
+          "from": 9,
+          "action": "prod.1.unblock",
+          "to": 6
+        },
+        {
+          "from": 9,
+          "action": "prod.2.unblock",
+          "to": 6
+        },
+        {
+          "from": 9,
+          "action": "cons.1.unblock",
+          "to": 6
+        },
+        {
+          "from": 9,
+          "action": "cons.2.unblock",
+          "to": 6
+        },
+        {
+          "from": 0,
+          "action": "prod.1.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.1.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.2.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.2.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.1.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.1.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.2.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.2.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.1.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "prod.2.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.1.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "prod.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "cons.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "cons.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "prod.1.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "prod.2.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "cons.1.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "cons.2.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "prod.1.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "prod.2.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "cons.1.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "cons.2.notify",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "prod.1.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "prod.2.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "cons.1.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "cons.2.unblock",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "{prod.1,prod.2,cons.1,cons.2}::count:VAR(0)",
+      "alphabet": [
+        "prod.1.count.dec",
+        "prod.2.count.dec",
+        "cons.1.count.dec",
+        "cons.2.count.dec",
+        "prod.1.count.read.0",
+        "prod.1.count.write.0",
+        "prod.2.count.read.0",
+        "prod.2.count.write.0",
+        "cons.1.count.read.0",
+        "cons.1.count.write.0",
+        "cons.2.count.read.0",
+        "cons.2.count.write.0",
+        "prod.1.count.inc",
+        "prod.1.count.write.1",
+        "prod.2.count.inc",
+        "prod.2.count.write.1",
+        "cons.1.count.inc",
+        "cons.1.count.write.1",
+        "cons.2.count.inc",
+        "cons.2.count.write.1",
+        "prod.1.count.read.1",
+        "prod.2.count.read.1",
+        "cons.1.count.read.1",
+        "cons.2.count.read.1"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "prod.1.count.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "prod.2.count.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "cons.1.count.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "cons.2.count.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "prod.1.count.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.1.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.2.count.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.2.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.1.count.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.1.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.2.count.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "cons.2.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "prod.1.count.inc",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "prod.1.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "prod.2.count.inc",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "prod.2.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.1.count.inc",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.1.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.2.count.inc",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "cons.2.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.1.count.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "prod.2.count.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "cons.1.count.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "cons.2.count.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "prod.1.count.dec",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "prod.1.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "prod.2.count.dec",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "prod.2.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.1.count.dec",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.1.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.2.count.dec",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "cons.2.count.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "prod.1.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.1.count.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.2.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "prod.2.count.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "cons.1.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "cons.1.count.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "cons.2.count.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "cons.2.count.read.1",
+          "to": 1
+        }
+      ]
+    }
+  ],
+  "property": {
+    "name": "SAFEMON",
+    "alphabet": [
+      "prod.2.notify",
+      "prod.2.notifyAll",
+      "prod.2.wait",
+      "prod.1.acquire",
+      "prod.2.acquire",
+      "cons.1.acquire",
+      "cons.2.acquire",
+      "prod.1.notify",
+      "prod.1.notifyAll",
+      "prod.1.wait",
+      "prod.1.release",
+      "cons.1.notify",
+      "cons.1.notifyAll",
+      "cons.1.wait",
+      "cons.1.release",
+      "cons.2.notify",
+      "cons.2.notifyAll",
+      "cons.2.wait",
+      "cons.2.release",
+      "prod.2.release"
+    ],
+    "initial": 0,
+    "end": -1,
+    "transitions": [
+      {
+        "from": 3,
+        "action": "prod.2.notify",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "prod.2.notifyAll",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "prod.2.wait",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "prod.2.release",
+        "to": 0
+      },
+      {
+        "from": 4,
+        "action": "prod.1.notify",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "prod.1.notifyAll",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "prod.1.wait",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "prod.1.release",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "prod.2.acquire",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "prod.1.acquire",
+        "to": 4
+      },
+      {
+        "from": 0,
+        "action": "cons.2.acquire",
+        "to": 1
+      },
+      {
+        "from": 0,
+        "action": "cons.1.acquire",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "cons.2.release",
+        "to": 0
+      },
+      {
+        "from": 1,
+        "action": "cons.2.notify",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "cons.2.notifyAll",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "cons.2.wait",
+        "to": 1
+      },
+      {
+        "from": 2,
+        "action": "cons.1.release",
+        "to": 0
+      },
+      {
+        "from": 2,
+        "action": "cons.1.notify",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "cons.1.notifyAll",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "cons.1.wait",
+        "to": 2
+      }
+    ]
+  },
+  "output": "property violation",
+  "meta": {
+    "category": "safety",
+    "source": "example/chapter13_lts/bufferimpl.lts",
+    "process": "BUFFERMON",
+    "propertyName": "SAFEMON",
+    "componentCount": 7,
+    "expectedComposite": {
+      "states": 2110,
+      "transitions": 62030
+    },
+    "violationTrace": [
+      "prod.1.wait"
+    ]
+  }
+}

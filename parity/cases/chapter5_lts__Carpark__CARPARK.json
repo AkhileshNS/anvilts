@@ -1,0 +1,99 @@
+{
+  "name": "chapter5_lts__Carpark__CARPARK",
+  "inputs": [
+    {
+      "name": "ARRIVALS",
+      "alphabet": [
+        "arrive"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "arrive",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "CARPARKCONTROL(4)",
+      "alphabet": [
+        "arrive",
+        "depart"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "arrive",
+          "to": 4
+        },
+        {
+          "from": 3,
+          "action": "depart",
+          "to": 2
+        },
+        {
+          "from": 4,
+          "action": "depart",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "arrive",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "depart",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "arrive",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "arrive",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "depart",
+          "to": 1
+        }
+      ]
+    },
+    {
+      "name": "DEPARTURES",
+      "alphabet": [
+        "depart"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "depart",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter5_lts/Carpark.lts",
+    "process": "CARPARK",
+    "componentCount": 3,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 5,
+      "transitions": 8
+    },
+    "deadlockTrace": []
+  }
+}

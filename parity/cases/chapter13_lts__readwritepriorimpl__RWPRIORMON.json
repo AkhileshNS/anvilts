@@ -1,0 +1,1731 @@
+{
+  "name": "chapter13_lts__readwritepriorimpl__RWPRIORMON",
+  "inputs": [
+    {
+      "name": "{reader.1,reader.2,writer.1,writer.2}::LOCK",
+      "alphabet": [
+        "reader.1.acquire",
+        "reader.2.acquire",
+        "writer.1.acquire",
+        "writer.2.acquire",
+        "reader.1.release",
+        "reader.2.release",
+        "writer.1.release",
+        "writer.2.release"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "reader.1.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.2.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.1.acquire",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.2.acquire",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.2.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.1.release",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.2.release",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.reader.1:ELEMENT",
+      "alphabet": [
+        "reader.1.endwait",
+        "unblockAll",
+        "reader.1.wait",
+        "reader.1.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "reader.1.endwait",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.unblock",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.reader.2:ELEMENT",
+      "alphabet": [
+        "reader.2.endwait",
+        "unblockAll",
+        "reader.2.wait",
+        "reader.2.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "reader.2.endwait",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.unblock",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.2.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.writer.1:ELEMENT",
+      "alphabet": [
+        "writer.1.endwait",
+        "unblockAll",
+        "writer.1.wait",
+        "writer.1.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "writer.1.endwait",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.unblock",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.1.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.writer.2:ELEMENT",
+      "alphabet": [
+        "writer.2.endwait",
+        "unblockAll",
+        "writer.2.wait",
+        "writer.2.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "writer.2.endwait",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.unblock",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "unblockAll",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.2.endwait",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "WAITSET.{reader.1,reader.2,writer.1,writer.2}::CONTROL",
+      "alphabet": [
+        "unblockAll",
+        "reader.1.notify",
+        "reader.2.notify",
+        "writer.1.notify",
+        "writer.2.notify",
+        "reader.1.notifyAll",
+        "reader.2.notifyAll",
+        "writer.1.notifyAll",
+        "writer.2.notifyAll",
+        "reader.1.wait",
+        "reader.2.wait",
+        "writer.1.wait",
+        "writer.2.wait",
+        "reader.1.unblock",
+        "reader.2.unblock",
+        "writer.1.unblock",
+        "writer.2.unblock"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 4,
+          "action": "reader.1.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "reader.2.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "writer.1.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "writer.2.notify",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "reader.1.notifyAll",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "reader.2.notifyAll",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "writer.1.notifyAll",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "writer.2.notifyAll",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "reader.1.wait",
+          "to": 7
+        },
+        {
+          "from": 4,
+          "action": "reader.2.wait",
+          "to": 7
+        },
+        {
+          "from": 4,
+          "action": "writer.1.wait",
+          "to": 7
+        },
+        {
+          "from": 4,
+          "action": "writer.2.wait",
+          "to": 7
+        },
+        {
+          "from": 11,
+          "action": "reader.1.unblock",
+          "to": 7
+        },
+        {
+          "from": 11,
+          "action": "reader.2.unblock",
+          "to": 7
+        },
+        {
+          "from": 11,
+          "action": "writer.1.unblock",
+          "to": 7
+        },
+        {
+          "from": 11,
+          "action": "writer.2.unblock",
+          "to": 7
+        },
+        {
+          "from": 5,
+          "action": "reader.1.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "reader.2.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "writer.1.unblock",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "writer.2.unblock",
+          "to": 1
+        },
+        {
+          "from": 10,
+          "action": "reader.1.notify",
+          "to": 11
+        },
+        {
+          "from": 10,
+          "action": "reader.2.notify",
+          "to": 11
+        },
+        {
+          "from": 10,
+          "action": "writer.1.notify",
+          "to": 11
+        },
+        {
+          "from": 10,
+          "action": "writer.2.notify",
+          "to": 11
+        },
+        {
+          "from": 10,
+          "action": "reader.1.notifyAll",
+          "to": 12
+        },
+        {
+          "from": 10,
+          "action": "reader.2.notifyAll",
+          "to": 12
+        },
+        {
+          "from": 10,
+          "action": "writer.1.notifyAll",
+          "to": 12
+        },
+        {
+          "from": 10,
+          "action": "writer.2.notifyAll",
+          "to": 12
+        },
+        {
+          "from": 6,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 7,
+          "action": "reader.1.wait",
+          "to": 10
+        },
+        {
+          "from": 7,
+          "action": "reader.2.wait",
+          "to": 10
+        },
+        {
+          "from": 7,
+          "action": "writer.1.wait",
+          "to": 10
+        },
+        {
+          "from": 7,
+          "action": "writer.2.wait",
+          "to": 10
+        },
+        {
+          "from": 7,
+          "action": "reader.1.notify",
+          "to": 8
+        },
+        {
+          "from": 7,
+          "action": "reader.2.notify",
+          "to": 8
+        },
+        {
+          "from": 7,
+          "action": "writer.1.notify",
+          "to": 8
+        },
+        {
+          "from": 7,
+          "action": "writer.2.notify",
+          "to": 8
+        },
+        {
+          "from": 7,
+          "action": "reader.1.notifyAll",
+          "to": 9
+        },
+        {
+          "from": 7,
+          "action": "reader.2.notifyAll",
+          "to": 9
+        },
+        {
+          "from": 7,
+          "action": "writer.1.notifyAll",
+          "to": 9
+        },
+        {
+          "from": 7,
+          "action": "writer.2.notifyAll",
+          "to": 9
+        },
+        {
+          "from": 12,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 8,
+          "action": "reader.1.unblock",
+          "to": 4
+        },
+        {
+          "from": 8,
+          "action": "reader.2.unblock",
+          "to": 4
+        },
+        {
+          "from": 8,
+          "action": "writer.1.unblock",
+          "to": 4
+        },
+        {
+          "from": 8,
+          "action": "writer.2.unblock",
+          "to": 4
+        },
+        {
+          "from": 9,
+          "action": "unblockAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.notifyAll",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.notify",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.2.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.1.wait",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.2.wait",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "reader.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "writer.1.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "writer.2.notifyAll",
+          "to": 3
+        },
+        {
+          "from": 1,
+          "action": "reader.1.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "reader.2.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "writer.1.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "writer.2.wait",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "reader.1.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.2.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.1.notify",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.2.notify",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.2.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.1.unblock",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.2.unblock",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "{reader.1,reader.2,writer.1,writer.2}::readers:VAR",
+      "alphabet": [
+        "reader.1.readers.dec",
+        "reader.2.readers.dec",
+        "writer.1.readers.dec",
+        "writer.2.readers.dec",
+        "reader.1.readers.read.0",
+        "reader.1.readers.write.0",
+        "reader.2.readers.read.0",
+        "reader.2.readers.write.0",
+        "writer.1.readers.read.0",
+        "writer.1.readers.write.0",
+        "writer.2.readers.read.0",
+        "writer.2.readers.write.0",
+        "reader.1.readers.write.2",
+        "reader.2.readers.write.2",
+        "writer.1.readers.write.2",
+        "writer.2.readers.write.2",
+        "reader.1.readers.inc",
+        "reader.1.readers.write.1",
+        "reader.2.readers.inc",
+        "reader.2.readers.write.1",
+        "writer.1.readers.inc",
+        "writer.1.readers.write.1",
+        "writer.2.readers.inc",
+        "writer.2.readers.write.1",
+        "reader.1.readers.read.2",
+        "reader.2.readers.read.2",
+        "writer.1.readers.read.2",
+        "writer.2.readers.read.2",
+        "reader.1.readers.read.1",
+        "reader.2.readers.read.1",
+        "writer.1.readers.read.1",
+        "writer.2.readers.read.1"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "reader.1.readers.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "reader.1.readers.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.1.readers.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.readers.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.2.readers.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.1.readers.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.2.readers.read.1",
+          "to": 2
+        }
+      ]
+    },
+    {
+      "name": "{reader.1,reader.2,writer.1,writer.2}::writing:BOOLVAR",
+      "alphabet": [
+        "reader.1.writing.read.0",
+        "reader.1.writing.write.0",
+        "reader.2.writing.read.0",
+        "reader.2.writing.write.0",
+        "writer.1.writing.read.0",
+        "writer.1.writing.write.0",
+        "writer.2.writing.read.0",
+        "writer.2.writing.write.0",
+        "reader.1.writing.write.1",
+        "reader.2.writing.write.1",
+        "writer.1.writing.write.1",
+        "writer.2.writing.write.1",
+        "reader.1.writing.read.1",
+        "reader.2.writing.read.1",
+        "writer.1.writing.read.1",
+        "writer.2.writing.read.1"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "reader.1.writing.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.writing.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.writing.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.writing.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.2.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.1.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.2.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.2.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.1.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.2.writing.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.1.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.writing.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.writing.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.writing.read.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.writing.write.1",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.writing.read.1",
+          "to": 1
+        }
+      ]
+    },
+    {
+      "name": "{reader.1,reader.2,writer.1,writer.2}::waitingW:VAR",
+      "alphabet": [
+        "reader.1.waitingW.dec",
+        "reader.2.waitingW.dec",
+        "writer.1.waitingW.dec",
+        "writer.2.waitingW.dec",
+        "reader.1.waitingW.read.0",
+        "reader.1.waitingW.write.0",
+        "reader.2.waitingW.read.0",
+        "reader.2.waitingW.write.0",
+        "writer.1.waitingW.read.0",
+        "writer.1.waitingW.write.0",
+        "writer.2.waitingW.read.0",
+        "writer.2.waitingW.write.0",
+        "reader.1.waitingW.write.2",
+        "reader.2.waitingW.write.2",
+        "writer.1.waitingW.write.2",
+        "writer.2.waitingW.write.2",
+        "reader.1.waitingW.inc",
+        "reader.1.waitingW.write.1",
+        "reader.2.waitingW.inc",
+        "reader.2.waitingW.write.1",
+        "writer.1.waitingW.inc",
+        "writer.1.waitingW.write.1",
+        "writer.2.waitingW.inc",
+        "writer.2.waitingW.write.1",
+        "reader.1.waitingW.read.2",
+        "reader.2.waitingW.read.2",
+        "writer.1.waitingW.read.2",
+        "writer.2.waitingW.read.2",
+        "reader.1.waitingW.read.1",
+        "reader.2.waitingW.read.1",
+        "writer.1.waitingW.read.1",
+        "writer.2.waitingW.read.1"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.dec",
+          "to": "ERROR"
+        },
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.read.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "reader.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.inc",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "writer.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.inc",
+          "to": "ERROR"
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.read.2",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "reader.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.dec",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "writer.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.dec",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.write.0",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.inc",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.write.2",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.1.waitingW.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "reader.2.waitingW.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.1.waitingW.read.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.write.1",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "writer.2.waitingW.read.1",
+          "to": 2
+        }
+      ]
+    }
+  ],
+  "property": {
+    "name": "SAFEMON",
+    "alphabet": [
+      "reader.2.notify",
+      "reader.2.notifyAll",
+      "reader.2.wait",
+      "reader.1.acquire",
+      "reader.2.acquire",
+      "writer.1.acquire",
+      "writer.2.acquire",
+      "reader.1.notify",
+      "reader.1.notifyAll",
+      "reader.1.wait",
+      "reader.1.release",
+      "writer.1.notify",
+      "writer.1.notifyAll",
+      "writer.1.wait",
+      "writer.1.release",
+      "writer.2.notify",
+      "writer.2.notifyAll",
+      "writer.2.wait",
+      "writer.2.release",
+      "reader.2.release"
+    ],
+    "initial": 0,
+    "end": -1,
+    "transitions": [
+      {
+        "from": 3,
+        "action": "reader.2.notify",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "reader.2.notifyAll",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "reader.2.wait",
+        "to": 3
+      },
+      {
+        "from": 3,
+        "action": "reader.2.release",
+        "to": 0
+      },
+      {
+        "from": 4,
+        "action": "reader.1.notify",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "reader.1.notifyAll",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "reader.1.wait",
+        "to": 4
+      },
+      {
+        "from": 4,
+        "action": "reader.1.release",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "reader.2.acquire",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "reader.1.acquire",
+        "to": 4
+      },
+      {
+        "from": 0,
+        "action": "writer.2.acquire",
+        "to": 1
+      },
+      {
+        "from": 0,
+        "action": "writer.1.acquire",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "writer.2.release",
+        "to": 0
+      },
+      {
+        "from": 1,
+        "action": "writer.2.notify",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "writer.2.notifyAll",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "writer.2.wait",
+        "to": 1
+      },
+      {
+        "from": 2,
+        "action": "writer.1.release",
+        "to": 0
+      },
+      {
+        "from": 2,
+        "action": "writer.1.notify",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "writer.1.notifyAll",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "writer.1.wait",
+        "to": 2
+      }
+    ]
+  },
+  "output": "property violation",
+  "meta": {
+    "category": "safety",
+    "source": "example/chapter13_lts/readwritepriorimpl.lts",
+    "process": "RWPRIORMON",
+    "propertyName": "SAFEMON",
+    "componentCount": 9,
+    "expectedComposite": {
+      "states": 10000,
+      "transitions": 690252
+    },
+    "violationTrace": [
+      "reader.1.wait"
+    ]
+  }
+}

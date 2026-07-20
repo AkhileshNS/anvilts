@@ -1,0 +1,349 @@
+{
+  "name": "chapter8_lts__RevisedCruiseControl__CONTROL",
+  "inputs": [
+    {
+      "name": "CRUISECONTROLLER",
+      "alphabet": [
+        "recordSpeed",
+        "enableControl",
+        "on",
+        "engineOff",
+        "accelerator",
+        "off",
+        "brake",
+        "disableControl",
+        "resume",
+        "engineOn",
+        "clearSpeed"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "recordSpeed",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "enableControl",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "on",
+          "to": 6
+        },
+        {
+          "from": 5,
+          "action": "engineOff",
+          "to": 8
+        },
+        {
+          "from": 5,
+          "action": "accelerator",
+          "to": 9
+        },
+        {
+          "from": 5,
+          "action": "off",
+          "to": 15
+        },
+        {
+          "from": 5,
+          "action": "brake",
+          "to": 14
+        },
+        {
+          "from": 6,
+          "action": "recordSpeed",
+          "to": 7
+        },
+        {
+          "from": 7,
+          "action": "enableControl",
+          "to": 5
+        },
+        {
+          "from": 8,
+          "action": "disableControl",
+          "to": 0
+        },
+        {
+          "from": 9,
+          "action": "disableControl",
+          "to": 10
+        },
+        {
+          "from": 11,
+          "action": "enableControl",
+          "to": 5
+        },
+        {
+          "from": 10,
+          "action": "resume",
+          "to": 11
+        },
+        {
+          "from": 10,
+          "action": "off",
+          "to": 10
+        },
+        {
+          "from": 10,
+          "action": "brake",
+          "to": 10
+        },
+        {
+          "from": 10,
+          "action": "accelerator",
+          "to": 10
+        },
+        {
+          "from": 10,
+          "action": "on",
+          "to": 12
+        },
+        {
+          "from": 10,
+          "action": "engineOff",
+          "to": 0
+        },
+        {
+          "from": 13,
+          "action": "enableControl",
+          "to": 5
+        },
+        {
+          "from": 12,
+          "action": "recordSpeed",
+          "to": 13
+        },
+        {
+          "from": 15,
+          "action": "disableControl",
+          "to": 10
+        },
+        {
+          "from": 14,
+          "action": "disableControl",
+          "to": 10
+        },
+        {
+          "from": 0,
+          "action": "off",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "brake",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "accelerator",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "engineOn",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "clearSpeed",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "on",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "engineOff",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "off",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "brake",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "accelerator",
+          "to": 2
+        }
+      ]
+    },
+    {
+      "name": "SPEEDCONTROL",
+      "alphabet": [
+        "speed",
+        "clearSpeed",
+        "recordSpeed",
+        "enableControl",
+        "disableControl",
+        "setThrottle"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "speed",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "clearSpeed",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "recordSpeed",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "enableControl",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "disableControl",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "recordSpeed",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "enableControl",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "speed",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "setThrottle",
+          "to": 1
+        }
+      ]
+    }
+  ],
+  "property": {
+    "name": "IMPROVEDSAFETY",
+    "alphabet": [
+      "off",
+      "brake",
+      "accelerator",
+      "disableControl",
+      "engineOff",
+      "on",
+      "resume"
+    ],
+    "initial": 0,
+    "end": -1,
+    "transitions": [
+      {
+        "from": 0,
+        "action": "off",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "brake",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "accelerator",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "disableControl",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "engineOff",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "on",
+        "to": 1
+      },
+      {
+        "from": 0,
+        "action": "resume",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "disableControl",
+        "to": 0
+      },
+      {
+        "from": 1,
+        "action": "on",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "resume",
+        "to": 1
+      },
+      {
+        "from": 1,
+        "action": "off",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "brake",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "accelerator",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "engineOff",
+        "to": 2
+      },
+      {
+        "from": 2,
+        "action": "disableControl",
+        "to": 0
+      }
+    ]
+  },
+  "output": "no property violation",
+  "meta": {
+    "category": "safety",
+    "source": "example/chapter8_lts/RevisedCruiseControl.lts",
+    "process": "CONTROL",
+    "propertyName": "IMPROVEDSAFETY",
+    "componentCount": 2,
+    "expectedComposite": {
+      "states": 23,
+      "transitions": 60
+    },
+    "violationTrace": []
+  }
+}

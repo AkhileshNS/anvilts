@@ -1,0 +1,282 @@
+{
+  "name": "chapter7_lts__Mutex_property__CHECK",
+  "inputs": [
+    {
+      "name": "SEMADEMO.p.1:LOOP",
+      "alphabet": [
+        "p.1.mutex.up",
+        "p.1.mutex.down",
+        "p.1.enter",
+        "p.1.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "p.1.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "p.1.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.1.enter",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "p.1.exit",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "SEMADEMO.p.2:LOOP",
+      "alphabet": [
+        "p.2.mutex.up",
+        "p.2.mutex.down",
+        "p.2.enter",
+        "p.2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "p.2.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "p.2.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.2.enter",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "p.2.exit",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "SEMADEMO.p.3:LOOP",
+      "alphabet": [
+        "p.3.mutex.up",
+        "p.3.mutex.down",
+        "p.3.enter",
+        "p.3.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "p.3.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "p.3.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "p.3.enter",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "p.3.exit",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "SEMADEMO.{p.1,p.2,p.3}::mutex:SEMAPHORE(1)",
+      "alphabet": [
+        "p.1.mutex.up",
+        "p.2.mutex.up",
+        "p.3.mutex.up",
+        "p.1.mutex.down",
+        "p.2.mutex.down",
+        "p.3.mutex.down"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "p.1.mutex.up",
+          "to": "ERROR"
+        },
+        {
+          "from": 3,
+          "action": "p.2.mutex.up",
+          "to": "ERROR"
+        },
+        {
+          "from": 3,
+          "action": "p.3.mutex.up",
+          "to": "ERROR"
+        },
+        {
+          "from": 3,
+          "action": "p.1.mutex.down",
+          "to": 2
+        },
+        {
+          "from": 3,
+          "action": "p.2.mutex.down",
+          "to": 2
+        },
+        {
+          "from": 3,
+          "action": "p.3.mutex.down",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "p.1.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "p.2.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "p.3.mutex.down",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "p.1.mutex.up",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "p.2.mutex.up",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "p.3.mutex.up",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "p.1.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "p.2.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "p.3.mutex.up",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "p.1.mutex.up",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "p.2.mutex.up",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "p.3.mutex.up",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "p.1.mutex.down",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "p.2.mutex.down",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "p.3.mutex.down",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "property": {
+    "name": "MUTEX",
+    "alphabet": [
+      "p.1.enter",
+      "p.2.enter",
+      "p.2.exit",
+      "p.3.enter",
+      "p.3.exit",
+      "p.1.exit"
+    ],
+    "initial": 0,
+    "end": -1,
+    "transitions": [
+      {
+        "from": 3,
+        "action": "p.1.exit",
+        "to": 0
+      },
+      {
+        "from": 0,
+        "action": "p.1.enter",
+        "to": 3
+      },
+      {
+        "from": 0,
+        "action": "p.3.enter",
+        "to": 1
+      },
+      {
+        "from": 0,
+        "action": "p.2.enter",
+        "to": 2
+      },
+      {
+        "from": 1,
+        "action": "p.3.exit",
+        "to": 0
+      },
+      {
+        "from": 2,
+        "action": "p.2.exit",
+        "to": 0
+      }
+    ]
+  },
+  "output": "no property violation",
+  "meta": {
+    "category": "safety",
+    "source": "example/chapter7_lts/Mutex_property.lts",
+    "process": "CHECK",
+    "propertyName": "MUTEX",
+    "componentCount": 4,
+    "expectedComposite": {
+      "states": 10,
+      "transitions": 12
+    },
+    "violationTrace": []
+  }
+}

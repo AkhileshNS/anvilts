@@ -1,0 +1,102 @@
+{
+  "name": "chapter14_lts__SingleLaneBridge_fluent__CONVOY",
+  "inputs": [
+    {
+      "name": "1:CAR",
+      "alphabet": [
+        "1.enter",
+        "1.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "1.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "2:CAR",
+      "alphabet": [
+        "2.enter",
+        "2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "2.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "2.exit",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "NOPASS1",
+      "alphabet": [
+        "1.enter",
+        "2.enter"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "1.enter",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "2.enter",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "NOPASS2",
+      "alphabet": [
+        "1.exit",
+        "2.exit"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "1.exit",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "2.exit",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter14_lts/SingleLaneBridge_fluent.lts",
+    "process": "CONVOY",
+    "componentCount": 4,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 6,
+      "transitions": 8
+    },
+    "deadlockTrace": []
+  }
+}

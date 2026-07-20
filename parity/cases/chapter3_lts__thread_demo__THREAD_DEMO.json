@@ -1,0 +1,116 @@
+{
+  "name": "chapter3_lts__thread_demo__THREAD_DEMO",
+  "inputs": [
+    {
+      "name": "a:ROTATOR",
+      "alphabet": [
+        "a.pause",
+        "stop",
+        "a.run",
+        "a.rotate"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "a.pause",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "stop",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "a.run",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "a.pause",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "stop",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "a.run",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "a.rotate",
+          "to": 2
+        }
+      ]
+    },
+    {
+      "name": "b:ROTATOR",
+      "alphabet": [
+        "b.pause",
+        "stop",
+        "b.run",
+        "b.rotate"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "b.pause",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "stop",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "b.run",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "b.pause",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "stop",
+          "to": 1
+        },
+        {
+          "from": 2,
+          "action": "b.run",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "b.rotate",
+          "to": 2
+        }
+      ]
+    }
+  ],
+  "output": "deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter3_lts/thread_demo.lts",
+    "process": "THREAD_DEMO",
+    "componentCount": 2,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 5,
+      "transitions": 24
+    },
+    "deadlockTrace": [
+      "stop"
+    ]
+  }
+}

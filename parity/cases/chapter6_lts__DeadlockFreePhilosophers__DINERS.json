@@ -1,0 +1,438 @@
+{
+  "name": "chapter6_lts__DeadlockFreePhilosophers__DINERS",
+  "inputs": [
+    {
+      "name": "phil.0:PHIL(0)",
+      "alphabet": [
+        "phil.0.eat",
+        "phil.0.left.put",
+        "phil.0.right.put",
+        "phil.0.arise",
+        "phil.0.sitdown",
+        "phil.0.left.get",
+        "phil.0.right.get"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "phil.0.eat",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "phil.0.left.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "phil.0.right.put",
+          "to": 6
+        },
+        {
+          "from": 6,
+          "action": "phil.0.arise",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "phil.0.sitdown",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.0.left.get",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "phil.0.right.get",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "{phil.0.left,phil.4.right}::FORK",
+      "alphabet": [
+        "phil.0.left.get",
+        "phil.4.right.get",
+        "phil.0.left.put",
+        "phil.4.right.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "phil.0.left.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "phil.4.right.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.0.left.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "phil.4.right.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "phil.1:PHIL(1)",
+      "alphabet": [
+        "phil.1.eat",
+        "phil.1.left.put",
+        "phil.1.right.put",
+        "phil.1.arise",
+        "phil.1.sitdown",
+        "phil.1.right.get",
+        "phil.1.left.get"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "phil.1.eat",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "phil.1.left.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "phil.1.right.put",
+          "to": 6
+        },
+        {
+          "from": 6,
+          "action": "phil.1.arise",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "phil.1.sitdown",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.1.right.get",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "phil.1.left.get",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "{phil.1.left,phil.0.right}::FORK",
+      "alphabet": [
+        "phil.1.left.get",
+        "phil.0.right.get",
+        "phil.1.left.put",
+        "phil.0.right.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "phil.1.left.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "phil.0.right.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.1.left.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "phil.0.right.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "phil.2:PHIL(2)",
+      "alphabet": [
+        "phil.2.eat",
+        "phil.2.left.put",
+        "phil.2.right.put",
+        "phil.2.arise",
+        "phil.2.sitdown",
+        "phil.2.left.get",
+        "phil.2.right.get"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "phil.2.eat",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "phil.2.left.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "phil.2.right.put",
+          "to": 6
+        },
+        {
+          "from": 6,
+          "action": "phil.2.arise",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "phil.2.sitdown",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.2.left.get",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "phil.2.right.get",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "{phil.2.left,phil.1.right}::FORK",
+      "alphabet": [
+        "phil.2.left.get",
+        "phil.1.right.get",
+        "phil.2.left.put",
+        "phil.1.right.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "phil.2.left.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "phil.1.right.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.2.left.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "phil.1.right.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "phil.3:PHIL(3)",
+      "alphabet": [
+        "phil.3.eat",
+        "phil.3.left.put",
+        "phil.3.right.put",
+        "phil.3.arise",
+        "phil.3.sitdown",
+        "phil.3.right.get",
+        "phil.3.left.get"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "phil.3.eat",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "phil.3.left.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "phil.3.right.put",
+          "to": 6
+        },
+        {
+          "from": 6,
+          "action": "phil.3.arise",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "phil.3.sitdown",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.3.right.get",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "phil.3.left.get",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "{phil.3.left,phil.2.right}::FORK",
+      "alphabet": [
+        "phil.3.left.get",
+        "phil.2.right.get",
+        "phil.3.left.put",
+        "phil.2.right.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "phil.3.left.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "phil.2.right.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.3.left.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "phil.2.right.put",
+          "to": 0
+        }
+      ]
+    },
+    {
+      "name": "phil.4:PHIL(4)",
+      "alphabet": [
+        "phil.4.eat",
+        "phil.4.left.put",
+        "phil.4.right.put",
+        "phil.4.arise",
+        "phil.4.sitdown",
+        "phil.4.left.get",
+        "phil.4.right.get"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "phil.4.eat",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "phil.4.left.put",
+          "to": 5
+        },
+        {
+          "from": 5,
+          "action": "phil.4.right.put",
+          "to": 6
+        },
+        {
+          "from": 6,
+          "action": "phil.4.arise",
+          "to": 0
+        },
+        {
+          "from": 0,
+          "action": "phil.4.sitdown",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.4.left.get",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "phil.4.right.get",
+          "to": 3
+        }
+      ]
+    },
+    {
+      "name": "{phil.4.left,phil.3.right}::FORK",
+      "alphabet": [
+        "phil.4.left.get",
+        "phil.3.right.get",
+        "phil.4.left.put",
+        "phil.3.right.put"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "phil.4.left.get",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "phil.3.right.get",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "phil.4.left.put",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "phil.3.right.put",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "output": "no deadlock",
+  "meta": {
+    "category": "deadlock",
+    "source": "example/chapter6_lts/DeadlockFreePhilosophers.lts",
+    "process": "DINERS",
+    "componentCount": 10,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 6849,
+      "transitions": 29995
+    },
+    "deadlockTrace": []
+  }
+}
