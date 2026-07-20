@@ -60,7 +60,10 @@ function displayProcessName(name: string): string {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-export function createSystemSketch(project?: DemoProject): SystemSketch {
+export function createSystemSketch(
+  project?: DemoProject,
+  variantId?: string,
+): SystemSketch {
   if (!project) {
     return {
       id: "untitled-system",
@@ -73,7 +76,10 @@ export function createSystemSketch(project?: DemoProject): SystemSketch {
     };
   }
 
-  const machines = project.variants[0]!.machines;
+  const variant =
+    project.variants.find((candidate) => candidate.id === variantId) ??
+    project.variants[0]!;
+  const machines = variant.machines;
   const processes = machines.map((machine, index) => ({
     id: `process-${index}-${safeId(machine.name)}`,
     name: displayProcessName(machine.name),

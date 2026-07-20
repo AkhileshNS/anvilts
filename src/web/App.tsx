@@ -1,18 +1,27 @@
-import { FormEvent, lazy, Suspense, useState } from "react";
-import { ArrowRight, ArrowUp } from "lucide-react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
+import { ArrowRight, ArrowUp, Check, LockKeyhole } from "lucide-react";
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+
 import {
   DEMO_PROJECTS,
   getDemoProject,
   type DemoProject,
 } from "../examples/demo-projects";
+import { createSystemSketch } from "../sketch/system-sketch";
 import type { SceneChangeSummary } from "./Whiteboard";
 
 const Whiteboard = lazy(() =>
   import("./Whiteboard").then((module) => ({ default: module.Whiteboard })),
 );
 
-const TABS = ["Whiteboard", "Output", "Logs"] as const;
+const TABS = ["Whiteboard", "Processes", "Verification"] as const;
 
 type WorkspaceTab = (typeof TABS)[number];
 
@@ -82,42 +91,33 @@ function IntroPage() {
   );
 }
 
-function EmptyPreview({
-  tab,
-  project,
-}: {
-  tab: WorkspaceTab;
-  project?: DemoProject;
-}) {
-  const content: Record<WorkspaceTab, { eyebrow: string; title: string; body: string }> = {
+function EmptyPreview({ tab }: { tab: WorkspaceTab }) {
+  const content: Record<
+    WorkspaceTab,
+    { eyebrow: string; title: string; body: string }
+  > = {
     Whiteboard: {
       eyebrow: "Visual model",
       title: "Your system will take shape here",
       body: "Processes, states, and shared actions will appear as you describe them.",
     },
-    Output: {
-      eyebrow: "Verification",
-      title: "No analysis yet",
+    Processes: {
+      eyebrow: "Formal model",
+      title: "Confirm the visual model first",
+      body: "The component state machines become available after you approve the system sketch.",
+    },
+    Verification: {
+      eyebrow: "Logic engine",
+      title: "No verification yet",
       body: "Deadlocks, property violations, and counterexample traces will appear here.",
     },
-    Logs: {
-      eyebrow: "Engine activity",
-      title: "Nothing to report",
-      body: "Composition and reachability details will be available here when a check runs.",
-    },
   };
-
-  const selected =
-    project && tab === "Whiteboard"
-      ? {
-          eyebrow: "Example loaded",
-          title: project.title,
-          body: project.verificationQuestion,
-        }
-      : content[tab];
+  const selected = content[tab];
 
   return (
-    <div className={`empty-preview empty-preview--${tab.toLowerCase()}`}>
+    <div
+      className={`empty-preview empty-preview--${tab.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       <div className="preview-glyph" aria-hidden="true">
         <span />
         <span />
@@ -130,15 +130,129 @@ function EmptyPreview({
   );
 }
 
+function FormalModelPreview({
+  project,
+  variantId,
+}: {
+  project: DemoProject;
+  variantId: string;
+}) {
+  const variant = project.variants.find((candidate) => candidate.id === variantId)!;
+  const sketch = createSystemSketch(project, variantId);
+  const localStateCount = variant.machines.reduce((total, machine) => {
+    const states = new Set([
+      machine.initial,
+      ...machine.transitions.flatMap((transition) => [transition.from, transition.to]),
+    ]);
+    return total + states.size;
+  }, 0);
+  const transitionCount = variant.machines.reduce(
+    (total, machine) => total + machine.transitions.length,
+    0,
+  );
+
+  return (
+    <div className="formal-model-preview">
+      <div className="formal-model-heading">
+        <span className="confirmation-mark" aria-hidden="true">
+          <Check size={17} strokeWidth={2.4} />
+        </span>
+        <div>
+          <p className="eyebrow">Confirmed model</p>
+          <h2>{variant.label}</h2>
+          <p>The visual sketch is frozen as the input to formalization.</p>
+        </div>
+      </div>
+
+      <dl className="model-metrics">
+        <div>
+          <dt>Processes</dt>
+          <dd>{variant.machines.length}</dd>
+        </div>
+        <div>
+          <dt>Local states</dt>
+          <dd>{localStateCount}</dd>
+        </div>
+        <div>
+          <dt>Transitions</dt>
+          <dd>{transitionCount}</dd>
+        </div>
+        <div>
+          <dt>Property monitor</dt>
+          <dd>{variant.property ? "Included" : "None"}</dd>
+        </div>
+      </dl>
+
+      <div className="process-inventory">
+        {variant.machines.map((machine, index) => (
+          <article key={`${variant.id}-${machine.name}`}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <h3>{sketch.processes[index]?.name ?? machine.name}</h3>
+              <p>
+                Initial state {machine.initial} · {machine.alphabet.length} actions ·{" "}
+                {machine.transitions.length} transitions
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <p className="next-slice-note">
+        Interactive state graphs and event stepping will be added in the next slice.
+      </p>
+    </div>
+  );
+}
+
 function WorkspacePage() {
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>("Whiteboard");
-  const [sceneSummary, setSceneSummary] = useState<SceneChangeSummary>();
   const location = useLocation();
   const routeState = location.state as {
     exampleId?: string;
     prompt?: string;
   } | null;
   const project = getDemoProject(routeState?.exampleId);
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>("Whiteboard");
+  const [sceneSummary, setSceneSummary] = useState<SceneChangeSummary>();
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    project?.variants[0]?.id ?? "",
+  );
+  const [confirmedRevision, setConfirmedRevision] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSelectedVariantId(project?.variants[0]?.id ?? "");
+    setSceneSummary(undefined);
+    setConfirmedRevision(null);
+    setActiveTab("Whiteboard");
+  }, [project]);
+
+  const selectedVariant = project?.variants.find(
+    (variant) => variant.id === selectedVariantId,
+  );
+  const sketch = useMemo(
+    () => createSystemSketch(project, selectedVariantId),
+    [project, selectedVariantId],
+  );
+  const currentRevision = sceneSummary?.revision ?? 0;
+  const isConfirmed =
+    selectedVariant !== undefined && confirmedRevision === currentRevision;
+
+  function selectVariant(variantId: string) {
+    setSelectedVariantId(variantId);
+    setSceneSummary(undefined);
+    setConfirmedRevision(null);
+    setActiveTab("Whiteboard");
+  }
+
+  function recordSceneChange(summary: SceneChangeSummary) {
+    setSceneSummary(summary);
+    setConfirmedRevision(null);
+  }
+
+  function confirmModel() {
+    setConfirmedRevision(currentRevision);
+    setActiveTab("Processes");
+  }
 
   return (
     <main className="workspace-page">
@@ -148,8 +262,13 @@ function WorkspacePage() {
           <span>AnviLTS</span>
         </Link>
         <span className="workspace-label">{project?.title ?? "Untitled system"}</span>
-        <button type="button" className="header-action" disabled>
-          Run verification
+        <button
+          type="button"
+          className={`header-action${isConfirmed ? " header-action--ready" : ""}`}
+          disabled={!isConfirmed}
+          onClick={() => setActiveTab("Processes")}
+        >
+          {isConfirmed ? "Inspect formal model" : "Confirm model to continue"}
         </button>
       </header>
 
@@ -157,32 +276,105 @@ function WorkspacePage() {
         <section className="chat-panel" aria-labelledby="chat-title">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Conversation</p>
-              <h1 id="chat-title">Build the model together</h1>
+              <p className="eyebrow">Review</p>
+              <h1 id="chat-title">Confirm the system model</h1>
             </div>
             <span className="status-dot" aria-label="Ready" />
           </div>
 
-          <div className="chat-empty">
-            <div className="chat-orbit" aria-hidden="true"><span /></div>
-            <h2>{project ? project.title : "Describe how your system behaves"}</h2>
-            <p>
-              {project
-                ? project.summary
-                : "I’ll ask questions and help turn the important interactions into a model."}
-            </p>
-          </div>
+          {project && selectedVariant ? (
+            <div className="example-review">
+              <div className="review-intro">
+                <p className="eyebrow">Loaded example</p>
+                <h2>{project.title}</h2>
+                <p>{project.summary}</p>
+              </div>
+
+              {project.variants.length > 1 && (
+                <fieldset className="variant-picker">
+                  <legend>Scenario</legend>
+                  {project.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      className={variant.id === selectedVariantId ? "active" : ""}
+                      aria-pressed={variant.id === selectedVariantId}
+                      onClick={() => selectVariant(variant.id)}
+                    >
+                      <strong>{variant.label}</strong>
+                      <span>{variant.description}</span>
+                    </button>
+                  ))}
+                </fieldset>
+              )}
+
+              <section className="review-question" aria-labelledby="review-question-title">
+                <p className="eyebrow">Verification question</p>
+                <h3 id="review-question-title">{project.verificationQuestion}</h3>
+              </section>
+
+              <div className="review-inventory" aria-label="Model inventory">
+                <span>{sketch.processes.length} processes</span>
+                <span>{sketch.interactions.length} shared actions</span>
+                <span>Revision {currentRevision}</span>
+              </div>
+
+              <div className={`confirmation-card${isConfirmed ? " confirmed" : ""}`}>
+                <span className="confirmation-icon" aria-hidden="true">
+                  {isConfirmed ? <Check size={18} /> : <LockKeyhole size={18} />}
+                </span>
+                <div>
+                  <strong>
+                    {isConfirmed ? "Model confirmed" : "Human confirmation required"}
+                  </strong>
+                  <p>
+                    {isConfirmed
+                      ? "The formal process models are now unlocked."
+                      : "Review the whiteboard and approve it before formalization."}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="confirm-model-button"
+                disabled={isConfirmed}
+                onClick={confirmModel}
+              >
+                {isConfirmed ? "Model confirmed" : "Confirm this system model"}
+                <ArrowRight size={17} aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
+            <div className="chat-empty">
+              <div className="chat-orbit" aria-hidden="true">
+                <span />
+              </div>
+              <h2>Describe how your system behaves</h2>
+              <p>
+                The conversational modeling flow will be connected after the example
+                workflow is complete.
+              </p>
+            </div>
+          )}
 
           <div className="composer-wrap">
             <div className="model-status">
               <span />
               {sceneSummary
                 ? `Whiteboard revision ${sceneSummary.revision} · ${sceneSummary.elementCount} elements`
-                : "Ready to model"}
+                : "Ready for review"}
             </div>
             <form className="composer" onSubmit={(event) => event.preventDefault()}>
-              <label htmlFor="chat-input" className="sr-only">Message AnviLTS</label>
-              <textarea id="chat-input" placeholder="Add a detail or ask a question…" rows={2} />
+              <label htmlFor="chat-input" className="sr-only">
+                Message AnviLTS
+              </label>
+              <textarea
+                id="chat-input"
+                placeholder="Conversation will be enabled after the example flow…"
+                rows={2}
+                disabled
+              />
               <button type="submit" aria-label="Send message" disabled>
                 <ArrowUp aria-hidden="true" size={17} strokeWidth={2.25} />
               </button>
@@ -210,10 +402,20 @@ function WorkspacePage() {
               <Suspense
                 fallback={<div className="whiteboard-loading">Preparing whiteboard…</div>}
               >
-                <Whiteboard project={project} onSceneChange={setSceneSummary} />
+                <Whiteboard
+                  key={`${project?.id ?? "untitled"}-${selectedVariantId}`}
+                  project={project}
+                  variantId={selectedVariantId}
+                  onSceneChange={recordSceneChange}
+                />
               </Suspense>
+            ) : activeTab === "Processes" &&
+              project &&
+              selectedVariant &&
+              isConfirmed ? (
+              <FormalModelPreview project={project} variantId={selectedVariant.id} />
             ) : (
-              <EmptyPreview tab={activeTab} project={project} />
+              <EmptyPreview tab={activeTab} />
             )}
           </div>
         </section>

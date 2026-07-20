@@ -32,6 +32,7 @@ export interface SceneChangeSummary {
 
 interface WhiteboardProps {
   project?: DemoProject;
+  variantId?: string;
   onSceneChange?: (summary: SceneChangeSummary) => void;
 }
 
@@ -214,8 +215,15 @@ function createInitialElements(sketch: SystemSketch) {
   );
 }
 
-export function Whiteboard({ project, onSceneChange }: WhiteboardProps) {
-  const sketch = useMemo(() => createSystemSketch(project), [project]);
+export function Whiteboard({
+  project,
+  variantId,
+  onSceneChange,
+}: WhiteboardProps) {
+  const sketch = useMemo(
+    () => createSystemSketch(project, variantId),
+    [project, variantId],
+  );
   const initialElements = useMemo(() => createInitialElements(sketch), [sketch]);
   const knownElements = useRef<Map<string, ElementRevision> | null>(null);
   const revision = useRef(0);
@@ -293,7 +301,7 @@ export function Whiteboard({ project, onSceneChange }: WhiteboardProps) {
   return (
     <div className="whiteboard-canvas">
       <Excalidraw
-        key={`${project?.id ?? "untitled"}-layout-${SCENE_LAYOUT_VERSION}`}
+        key={`${project?.id ?? "untitled"}-${variantId ?? "default"}-layout-${SCENE_LAYOUT_VERSION}`}
         initialData={{
           elements: initialElements,
           appState: {

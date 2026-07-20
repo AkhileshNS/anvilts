@@ -332,6 +332,17 @@ a:focus-visible {
   font-size: 0.73rem;
 }
 
+.header-action--ready {
+  cursor: pointer;
+  border-color: #686868;
+  color: #101010;
+  background: var(--accent);
+}
+
+.header-action--ready:hover {
+  background: #dddddd;
+}
+
 .workspace-shell {
   display: grid;
   min-height: 0;
@@ -395,6 +406,173 @@ a:focus-visible {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.6;
+}
+
+.example-review {
+  min-height: 0;
+  padding: 1.35rem 1.5rem 1.6rem;
+  overflow-y: auto;
+}
+
+.review-intro h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.review-intro > p:last-child {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.variant-picker {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.variant-picker legend {
+  margin-bottom: 0.55rem;
+  color: var(--dim);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.variant-picker button {
+  display: grid;
+  gap: 0.28rem;
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  color: var(--muted);
+  background: #151515;
+  text-align: left;
+}
+
+.variant-picker button:hover,
+.variant-picker button.active {
+  border-color: #626262;
+  color: var(--text);
+  background: #1b1b1b;
+}
+
+.variant-picker button strong {
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.variant-picker button span {
+  color: var(--dim);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.review-question {
+  margin-top: 1.35rem;
+  padding: 1rem;
+  border-left: 2px solid var(--accent);
+  background: #0f0f0f;
+}
+
+.review-question h3 {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.review-inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.review-inventory span {
+  padding: 0.4rem 0.58rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: #151515;
+  font-size: 0.65rem;
+}
+
+.confirmation-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #101010;
+}
+
+.confirmation-card.confirmed {
+  border-color: #656565;
+  background: #181818;
+}
+
+.confirmation-icon,
+.confirmation-mark {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #555555;
+  border-radius: 50%;
+  place-items: center;
+  color: var(--text);
+  background: #1a1a1a;
+}
+
+.confirmation-card strong {
+  font-size: 0.76rem;
+}
+
+.confirmation-card p {
+  margin: 0.2rem 0 0;
+  color: var(--dim);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.confirm-model-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.7rem;
+  padding: 0.78rem 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  border-radius: 0.7rem;
+  color: #101010;
+  background: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.confirm-model-button:hover {
+  background: #dddddd;
+}
+
+.confirm-model-button:disabled {
+  cursor: default;
+  border-color: var(--line);
+  color: var(--dim);
+  background: #171717;
 }
 
 .chat-orbit {
@@ -466,6 +644,11 @@ a:focus-visible {
   background: transparent;
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.composer textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .composer button {
@@ -556,6 +739,108 @@ a:focus-visible {
   --color-primary-light-darker: #383838;
 }
 
+.formal-model-preview {
+  width: min(100%, 62rem);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.formal-model-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.formal-model-heading h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 500;
+}
+
+.formal-model-heading > div > p:last-child {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.model-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 1.25rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.model-metrics div {
+  padding: 0.95rem;
+  background: #141414;
+}
+
+.model-metrics div + div {
+  border-left: 1px solid var(--line);
+}
+
+.model-metrics dt {
+  color: var(--dim);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.model-metrics dd {
+  margin: 0.35rem 0 0;
+  color: var(--text);
+  font-family: Georgia, serif;
+  font-size: 1.25rem;
+}
+
+.process-inventory {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+
+.process-inventory article {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: #121212;
+}
+
+.process-inventory article > span {
+  color: var(--dim);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.7rem;
+}
+
+.process-inventory h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.process-inventory p {
+  margin: 0.25rem 0 0;
+  color: var(--dim);
+  font-size: 0.68rem;
+}
+
+.next-slice-note {
+  margin: 1rem 0 0;
+  color: var(--dim);
+  font-size: 0.68rem;
+  text-align: right;
+}
+
 .empty-preview {
   display: grid;
   min-height: 100%;
@@ -634,11 +919,11 @@ a:focus-visible {
   bottom: 0;
 }
 
-.empty-preview--output .preview-glyph span:first-child {
+.empty-preview--processes .preview-glyph span:first-child {
   border-color: var(--tone-mid);
 }
 
-.empty-preview--logs .preview-glyph span:first-child {
+.empty-preview--verification .preview-glyph span:first-child {
   border-color: var(--tone-dim);
 }
 
@@ -685,6 +970,22 @@ a:focus-visible {
 
   .empty-preview {
     min-height: 28rem;
+  }
+
+  .model-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .model-metrics div + div {
+    border-left: 0;
+  }
+
+  .model-metrics div:nth-child(even) {
+    border-left: 1px solid var(--line);
+  }
+
+  .model-metrics div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
   }
 }
 
