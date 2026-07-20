@@ -1,22 +1,22 @@
 :root {
-  color: #eef2ea;
-  background: #090c0b;
+  color: #f1f1f1;
+  background: #090909;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --bg: #090c0b;
-  --panel: #101412;
-  --panel-soft: #141916;
-  --line: #2a312d;
-  --line-strong: #3a4640;
-  --text: #eef2ea;
-  --muted: #9aa49e;
-  --dim: #6f7973;
-  --accent: #b7f36b;
-  --accent-dark: #17250e;
-  --blue: #74b7ff;
+  --bg: #090909;
+  --panel: #121212;
+  --panel-soft: #171717;
+  --line: #2b2b2b;
+  --line-strong: #414141;
+  --text: #f1f1f1;
+  --muted: #a1a1a1;
+  --dim: #737373;
+  --accent: #f4f5f4;
+  --tone-mid: #b9b9b9;
+  --tone-dim: #888888;
 }
 
 * {
@@ -34,7 +34,7 @@ body,
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% -20%, rgba(183, 243, 107, 0.08), transparent 34rem),
+    radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.07), transparent 34rem),
     var(--bg);
 }
 
@@ -89,7 +89,7 @@ a:focus-visible {
   position: absolute;
   width: 3.7rem;
   height: 3.7rem;
-  border: 1px solid #56615a;
+  border: 1px solid #5c5c5c;
   content: "";
   transform: rotate(45deg);
 }
@@ -102,10 +102,10 @@ a:focus-visible {
   position: absolute;
   width: 4rem;
   height: 4rem;
-  border: 1px solid #6e7b73;
+  border: 1px solid #747474;
   border-radius: 50%;
-  background: #111612;
-  box-shadow: 0 0 28px rgba(183, 243, 107, 0.12);
+  background: #131313;
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.1);
 }
 
 .mark__core {
@@ -154,7 +154,7 @@ a:focus-visible {
   background:
     linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
-    rgba(13, 17, 15, 0.94);
+    rgba(15, 15, 15, 0.94);
   background-size: 36px 36px;
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
 }
@@ -193,7 +193,7 @@ a:focus-visible {
 .prompt-form > label {
   display: block;
   margin: 0 0 0.75rem;
-  color: #c8d0ca;
+  color: #cccccc;
   font-size: 0.86rem;
   font-weight: 600;
 }
@@ -205,13 +205,13 @@ a:focus-visible {
   padding: 0.7rem;
   border: 1px solid var(--line-strong);
   border-radius: 1rem;
-  background: #0d110f;
+  background: #0f0f0f;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.012);
   transition: border-color 150ms ease;
 }
 
 .prompt-box:focus-within {
-  border-color: #69786f;
+  border-color: #707070;
 }
 
 .prompt-box textarea {
@@ -227,7 +227,7 @@ a:focus-visible {
 
 .prompt-box textarea::placeholder,
 .composer textarea::placeholder {
-  color: #626c66;
+  color: #676767;
 }
 
 .prompt-box button,
@@ -240,14 +240,14 @@ a:focus-visible {
   border: 0;
   border-radius: 50%;
   place-items: center;
-  color: #142007;
+  color: #0c0c0c;
   background: var(--accent);
   font-size: 1.25rem;
   transition: transform 150ms ease, background 150ms ease;
 }
 
 .prompt-box button:hover {
-  background: #c8ff83;
+  background: #e1e1e1;
   transform: translateX(2px);
 }
 
@@ -274,16 +274,16 @@ a:focus-visible {
   cursor: pointer;
   border: 1px solid var(--line);
   border-radius: 999px;
-  color: #b8c1bb;
-  background: #121714;
+  color: #bdbdbd;
+  background: #151515;
   font-size: 0.77rem;
   transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
 }
 
 .example-list button:hover {
-  border-color: #58655d;
+  border-color: #5f5f5f;
   color: var(--text);
-  background: #171e1a;
+  background: #1b1b1b;
 }
 
 /* Workspace */
@@ -303,7 +303,7 @@ a:focus-visible {
   align-items: center;
   padding: 0 1.15rem;
   border-bottom: 1px solid var(--line);
-  background: #0c100e;
+  background: #0e0e0e;
 }
 
 .wordmark {
@@ -371,7 +371,7 @@ a:focus-visible {
   height: 0.5rem;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(183, 243, 107, 0.08);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
 .chat-empty {
@@ -402,7 +402,7 @@ a:focus-visible {
   display: grid;
   width: 3.4rem;
   height: 3.4rem;
-  border: 1px solid #38423c;
+  border: 1px solid #3d3d3d;
   border-radius: 50%;
   place-items: center;
 }
@@ -410,7 +410,7 @@ a:focus-visible {
 .chat-orbit::before {
   width: 2.2rem;
   height: 2.2rem;
-  border: 1px dashed #4f5c54;
+  border: 1px dashed #565656;
   border-radius: 50%;
   content: "";
 }
@@ -421,13 +421,13 @@ a:focus-visible {
   height: 0.55rem;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 18px rgba(183, 243, 107, 0.45);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.3);
 }
 
 .composer-wrap {
   padding: 0.9rem;
   border-top: 1px solid var(--line);
-  background: #0d110f;
+  background: #0f0f0f;
 }
 
 .model-status {
@@ -453,7 +453,7 @@ a:focus-visible {
   padding: 0.65rem;
   border: 1px solid var(--line-strong);
   border-radius: 0.85rem;
-  background: #121714;
+  background: #151515;
 }
 
 .composer textarea {
@@ -478,7 +478,7 @@ a:focus-visible {
 .preview-panel {
   display: grid;
   grid-template-rows: 3.7rem minmax(0, 1fr);
-  background: #0d110f;
+  background: #0f0f0f;
 }
 
 .tabs {
@@ -522,7 +522,7 @@ a:focus-visible {
 .preview-content {
   min-height: 0;
   overflow: auto;
-  background-image: radial-gradient(circle, #26302a 1px, transparent 1px);
+  background-image: radial-gradient(circle, #2b2b2b 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -562,7 +562,7 @@ a:focus-visible {
   position: absolute;
   top: 50%;
   width: 3rem;
-  border-top: 1px solid #47534c;
+  border-top: 1px solid #4d4d4d;
   content: "";
 }
 
@@ -582,9 +582,9 @@ a:focus-visible {
   display: block;
   width: 1.8rem;
   height: 1.8rem;
-  border: 1px solid #56635b;
+  border: 1px solid #5d5d5d;
   border-radius: 50%;
-  background: #111713;
+  background: #151515;
   box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.012);
 }
 
@@ -605,11 +605,11 @@ a:focus-visible {
 }
 
 .empty-preview--output .preview-glyph span:first-child {
-  border-color: var(--blue);
+  border-color: var(--tone-mid);
 }
 
 .empty-preview--logs .preview-glyph span:first-child {
-  border-color: #eeb865;
+  border-color: var(--tone-dim);
 }
 
 @media (max-width: 760px) {
