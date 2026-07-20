@@ -520,10 +520,40 @@ a:focus-visible {
 }
 
 .preview-content {
+  position: relative;
   min-height: 0;
   overflow: auto;
-  background-image: radial-gradient(circle, #2b2b2b 1px, transparent 1px);
-  background-size: 24px 24px;
+  background: #0f0f0f;
+}
+
+.whiteboard-canvas {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+  background: #0f0f0f;
+  color-scheme: dark;
+  text-align: left;
+}
+
+.whiteboard-loading {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.whiteboard-canvas .excalidraw {
+  background: #0f0f0f;
+}
+
+.whiteboard-canvas .excalidraw.theme--dark {
+  --color-primary: #d8d8d8;
+  --color-primary-darker: #b8b8b8;
+  --color-primary-darkest: #999999;
+  --color-primary-light: #303030;
+  --color-primary-light-darker: #383838;
 }
 
 .empty-preview {

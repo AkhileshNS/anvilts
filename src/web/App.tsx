@@ -1,8 +1,17 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, lazy, Suspense, useState } from "react";
 import { ArrowRight, ArrowUp } from "lucide-react";
-import { Link, Route, Routes, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import {
+  DEMO_PROJECTS,
+  getDemoProject,
+  type DemoProject,
+} from "../examples/demo-projects";
+import type { SceneChangeSummary } from "./Whiteboard";
 
-const EXAMPLES = ["Coin", "Client–Server", "Reader–Writer", "Maker–User"];
+const Whiteboard = lazy(() =>
+  import("./Whiteboard").then((module) => ({ default: module.Whiteboard })),
+);
+
 const TABS = ["Whiteboard", "Output", "Logs"] as const;
 
 type WorkspaceTab = (typeof TABS)[number];
@@ -55,9 +64,15 @@ function IntroPage() {
         <div className="examples" aria-label="Example systems">
           <span>or load an example</span>
           <div className="example-list">
-            {EXAMPLES.map((example) => (
-              <button key={example} type="button" onClick={() => navigate("/workspace")}>
-                {example}
+            {DEMO_PROJECTS.map((example) => (
+              <button
+                key={example.id}
+                type="button"
+                onClick={() =>
+                  navigate("/workspace", { state: { exampleId: example.id } })
+                }
+              >
+                {example.shortTitle}
               </button>
             ))}
           </div>
@@ -67,7 +82,13 @@ function IntroPage() {
   );
 }
 
-function EmptyPreview({ tab }: { tab: WorkspaceTab }) {
+function EmptyPreview({
+  tab,
+  project,
+}: {
+  tab: WorkspaceTab;
+  project?: DemoProject;
+}) {
   const content: Record<WorkspaceTab, { eyebrow: string; title: string; body: string }> = {
     Whiteboard: {
       eyebrow: "Visual model",
@@ -86,7 +107,14 @@ function EmptyPreview({ tab }: { tab: WorkspaceTab }) {
     },
   };
 
-  const selected = content[tab];
+  const selected =
+    project && tab === "Whiteboard"
+      ? {
+          eyebrow: "Example loaded",
+          title: project.title,
+          body: project.verificationQuestion,
+        }
+      : content[tab];
 
   return (
     <div className={`empty-preview empty-preview--${tab.toLowerCase()}`}>
@@ -104,6 +132,13 @@ function EmptyPreview({ tab }: { tab: WorkspaceTab }) {
 
 function WorkspacePage() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("Whiteboard");
+  const [sceneSummary, setSceneSummary] = useState<SceneChangeSummary>();
+  const location = useLocation();
+  const routeState = location.state as {
+    exampleId?: string;
+    prompt?: string;
+  } | null;
+  const project = getDemoProject(routeState?.exampleId);
 
   return (
     <main className="workspace-page">
@@ -112,7 +147,7 @@ function WorkspacePage() {
           <Mark small />
           <span>AnviLTS</span>
         </Link>
-        <span className="workspace-label">Untitled system</span>
+        <span className="workspace-label">{project?.title ?? "Untitled system"}</span>
         <button type="button" className="header-action" disabled>
           Run verification
         </button>
@@ -130,12 +165,21 @@ function WorkspacePage() {
 
           <div className="chat-empty">
             <div className="chat-orbit" aria-hidden="true"><span /></div>
-            <h2>Describe how your system behaves</h2>
-            <p>I’ll ask questions and help turn the important interactions into a model.</p>
+            <h2>{project ? project.title : "Describe how your system behaves"}</h2>
+            <p>
+              {project
+                ? project.summary
+                : "I’ll ask questions and help turn the important interactions into a model."}
+            </p>
           </div>
 
           <div className="composer-wrap">
-            <div className="model-status"><span /> Ready to model</div>
+            <div className="model-status">
+              <span />
+              {sceneSummary
+                ? `Whiteboard revision ${sceneSummary.revision} · ${sceneSummary.elementCount} elements`
+                : "Ready to model"}
+            </div>
             <form className="composer" onSubmit={(event) => event.preventDefault()}>
               <label htmlFor="chat-input" className="sr-only">Message AnviLTS</label>
               <textarea id="chat-input" placeholder="Add a detail or ask a question…" rows={2} />
@@ -162,7 +206,15 @@ function WorkspacePage() {
             ))}
           </div>
           <div className="preview-content" role="tabpanel">
-            <EmptyPreview tab={activeTab} />
+            {activeTab === "Whiteboard" ? (
+              <Suspense
+                fallback={<div className="whiteboard-loading">Preparing whiteboard…</div>}
+              >
+                <Whiteboard project={project} onSceneChange={setSceneSummary} />
+              </Suspense>
+            ) : (
+              <EmptyPreview tab={activeTab} project={project} />
+            )}
           </div>
         </section>
       </div>
