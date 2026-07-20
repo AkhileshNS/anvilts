@@ -1,8 +1,13 @@
 export const NO_END = -1;
 export const END_STATE = "END";
+export const ERROR_STATE = "ERROR";
 export const TAU = "tau";
 
-export type State = number | typeof END_STATE | State[];
+export type State =
+  | number
+  | typeof END_STATE
+  | typeof ERROR_STATE
+  | State[];
 
 export interface Transition<StateType extends State = State> {
   from: StateType;
@@ -27,7 +32,7 @@ function isState(value: unknown): value is State {
     return Number.isInteger(value) && value >= 0;
   }
 
-  if (value === END_STATE) {
+  if (value === END_STATE || value === ERROR_STATE) {
     return true;
   }
 
@@ -75,7 +80,7 @@ export function parseStateMachine(value: unknown): StateMachine {
 
   const end = value.end ?? NO_END;
 
-  if (end !== NO_END && !isState(end)) {
+  if (end !== NO_END && (end === ERROR_STATE || !isState(end))) {
     throw new Error(
       '"end" must be -1, a state, or the reserved composite state "END".',
     );

@@ -1,6 +1,7 @@
 import { exploreReachable } from "./reachability.ts";
 import {
   END_STATE,
+  ERROR_STATE,
   NO_END,
   TAU,
   statesEqual,
@@ -10,7 +11,10 @@ import {
 } from "./state-machine.ts";
 
 export type CompositeState = State[];
-export type CompositeMachineState = CompositeState | typeof END_STATE;
+export type CompositeMachineState =
+  | CompositeState
+  | typeof END_STATE
+  | typeof ERROR_STATE;
 
 function enabledTransitions(
   machine: StateMachine,
@@ -86,10 +90,18 @@ export function composeStateMachines(
     );
   }
 
+  function normalizeTarget(state: CompositeState): CompositeMachineState {
+    if (state.some((localState) => statesEqual(localState, ERROR_STATE))) {
+      return ERROR_STATE;
+    }
+
+    return isCompositeEnd(state) ? END_STATE : state;
+  }
+
   function eligibleTransitions(
     compositeState: CompositeMachineState,
   ): Transition<CompositeMachineState>[] {
-    if (compositeState === END_STATE) {
+    if (compositeState === END_STATE || compositeState === ERROR_STATE) {
       return [];
     }
 
@@ -111,7 +123,7 @@ export function composeStateMachines(
             eligible.push({
               from: [...compositeState],
               action: TAU,
-              to: isCompositeEnd(target) ? END_STATE : target,
+              to: normalizeTarget(target),
             });
           }
         }
@@ -157,7 +169,7 @@ export function composeStateMachines(
         eligible.push({
           from: [...compositeState],
           action,
-          to: isCompositeEnd(target) ? END_STATE : target,
+          to: normalizeTarget(target),
         });
       }
     }
@@ -166,13 +178,12 @@ export function composeStateMachines(
   }
 
   const componentInitialState = machines.map((machine) => machine.initial);
-  const initial: CompositeMachineState = isCompositeEnd(componentInitialState)
-    ? END_STATE
-    : componentInitialState;
+  const initial = normalizeTarget(componentInitialState);
   const result = exploreReachable({
     initial,
     eligibleTransitions,
     isEnd: (state) => state === END_STATE,
+    isError: (state) => state === ERROR_STATE,
   });
 
   return {

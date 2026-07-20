@@ -2,7 +2,11 @@ import { readFile } from "node:fs/promises";
 import { Command } from "commander";
 
 import { composeStateMachines } from "./compose.ts";
-import { detectDeadlocks } from "./reachability.ts";
+import { monitorProperty } from "./property.ts";
+import {
+  detectDeadlocks,
+  type ReachabilityResult,
+} from "./reachability.ts";
 import {
   parseStateMachineJson,
   type State,
@@ -34,9 +38,7 @@ function formatState(state: State): string {
   return JSON.stringify(state);
 }
 
-function printDeadlockAnalysis(machine: StateMachine): void {
-  const analysis = detectDeadlocks(machine);
-
+function printDeadlockAnalysis(analysis: ReachabilityResult): void {
   if (analysis.deadlocks.length === 0) {
     console.log(
       `No deadlocks found across ${analysis.states.length} reachable state(s).`,
@@ -63,6 +65,37 @@ function printDeadlockAnalysis(machine: StateMachine): void {
   }
 }
 
+function printPropertyAnalysis(
+  propertyName: string,
+  analysis: ReachabilityResult,
+): void {
+  if (analysis.violations.length === 0) {
+    console.log(
+      `Property ${JSON.stringify(propertyName)} satisfied across ` +
+        `${analysis.states.length} reachable state(s).`,
+    );
+    return;
+  }
+
+  const violation = analysis.violations[0]!;
+  console.log(
+    `Property ${JSON.stringify(propertyName)} violated at ` +
+      formatState(violation.state),
+  );
+
+  if (violation.trace.length === 0) {
+    console.log("  The initial state violates the property.");
+    return;
+  }
+
+  for (const transition of violation.trace) {
+    console.log(
+      `  ${formatState(transition.from)} --${transition.action}--> ` +
+        formatState(transition.to),
+    );
+  }
+}
+
 const program = new Command();
 
 program
@@ -78,6 +111,7 @@ program
     "comma-separated process names to compose",
     parseProcessNames,
   )
+  .option("-p, --property <path>", "path to a safety-property JSON file")
   .option("-d, --check-deadlock", "check reachable states for deadlocks")
   .showHelpAfterError()
   .parse();
@@ -85,6 +119,7 @@ program
 const options = program.opts<{
   stateMachine: string[];
   compose?: string[];
+  property?: string;
   checkDeadlock?: boolean;
 }>();
 
@@ -94,6 +129,7 @@ try {
   );
 
   let stateMachine: StateMachine;
+  let successMessage: string;
 
   if (options.compose === undefined) {
     if (loadedMachines.length !== 1) {
@@ -103,7 +139,7 @@ try {
     }
 
     stateMachine = loadedMachines[0]!;
-    console.log("State machine loaded successfully:");
+    successMessage = "State machine loaded successfully:";
   } else {
     const machinesByName = new Map(
       loadedMachines.map((machine) => [machine.name, machine]),
@@ -118,17 +154,35 @@ try {
       return machine;
     });
     stateMachine = composeStateMachines(selectedMachines);
-    console.log("Composite state machine created successfully:");
+    successMessage = "Composite state machine created successfully:";
   }
 
+  let propertyName: string | undefined;
+
+  if (options.property !== undefined) {
+    const property = await loadStateMachine(options.property);
+    propertyName = property.name;
+    stateMachine = monitorProperty(stateMachine, property);
+    successMessage = "Property monitor applied successfully:";
+  }
+
+  console.log(successMessage);
   console.log(JSON.stringify(stateMachine, null, 2));
 
-  if (options.checkDeadlock === true) {
+  if (options.checkDeadlock === true || propertyName !== undefined) {
+    const analysis = detectDeadlocks(stateMachine);
     console.log();
-    printDeadlockAnalysis(stateMachine);
+
+    if (propertyName !== undefined) {
+      printPropertyAnalysis(propertyName, analysis);
+    }
+
+    if (options.checkDeadlock === true) {
+      printDeadlockAnalysis(analysis);
+    }
   }
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(`Unable to load state machine: ${message}`);
+  console.error(`AnviLTS error: ${message}`);
   process.exitCode = 1;
 }

@@ -1,4 +1,5 @@
 import {
+  ERROR_STATE,
   NO_END,
   stateKey,
   statesEqual,
@@ -11,6 +12,7 @@ export interface ReachabilityOptions<StateType extends State> {
   initial: StateType;
   eligibleTransitions: (state: StateType) => Transition<StateType>[];
   isEnd: (state: StateType) => boolean;
+  isError?: (state: StateType) => boolean;
 }
 
 export interface Deadlock<StateType extends State = State> {
@@ -22,6 +24,7 @@ export interface ReachabilityResult<StateType extends State = State> {
   states: StateType[];
   transitions: Transition<StateType>[];
   deadlocks: Deadlock<StateType>[];
+  violations: Deadlock<StateType>[];
 }
 
 interface Parent<StateType extends State> {
@@ -62,10 +65,21 @@ export function exploreReachable<StateType extends State>(
   const parents = new Map<string, Parent<StateType>>();
   const transitions: Transition<StateType>[] = [];
   const deadlocks: Deadlock<StateType>[] = [];
+  const violations: Deadlock<StateType>[] = [];
 
   for (let cursor = 0; cursor < worklist.length; cursor += 1) {
     const state = worklist[cursor]!;
     const isEnd = options.isEnd(state);
+    const isError = options.isError?.(state) ?? false;
+
+    if (isError) {
+      violations.push({
+        state,
+        trace: buildTrace(state, parents),
+      });
+      continue;
+    }
+
     const successors = isEnd ? [] : options.eligibleTransitions(state);
 
     if (successors.length === 0 && !isEnd) {
@@ -92,7 +106,7 @@ export function exploreReachable<StateType extends State>(
     }
   }
 
-  return { states: worklist, transitions, deadlocks };
+  return { states: worklist, transitions, deadlocks, violations };
 }
 
 export function detectDeadlocks<StateType extends State>(
@@ -112,5 +126,6 @@ export function detectDeadlocks<StateType extends State>(
     eligibleTransitions: (state) => outgoing.get(stateKey(state)) ?? [],
     isEnd: (state) =>
       machine.end !== NO_END && statesEqual(state, machine.end),
+    isError: (state) => statesEqual(state, ERROR_STATE),
   });
 }
