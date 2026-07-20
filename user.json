@@ -1,0 +1,9 @@
+{
+  "name": "USER",
+  "alphabet": ["tau", "ready", "use"],
+  "initial": 0,
+  "transitions": [
+    { "from": 0, "action": "ready", "to": 1 },
+    { "from": 1, "action": "use", "to": 0 }
+  ]
+}

@@ -1,22 +1,28 @@
-export interface Transition {
-  from: number;
+export type State = number | State[];
+
+export interface Transition<StateType extends State = State> {
+  from: StateType;
   action: string;
-  to: number;
+  to: StateType;
 }
 
-export interface StateMachine {
+export interface StateMachine<StateType extends State = State> {
   name: string;
   alphabet: string[];
-  initial: number;
-  transitions: Transition[];
+  initial: StateType;
+  transitions: Transition<StateType>[];
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isState(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+function isState(value: unknown): value is State {
+  if (typeof value === "number") {
+    return Number.isInteger(value) && value >= 0;
+  }
+
+  return Array.isArray(value) && value.length > 0 && value.every(isState);
 }
 
 /**
@@ -45,7 +51,9 @@ export function parseStateMachine(value: unknown): StateMachine {
   }
 
   if (!isState(value.initial)) {
-    throw new Error('"initial" must be a non-negative integer.');
+    throw new Error(
+      '"initial" must be a non-negative integer or a non-empty tuple of states.',
+    );
   }
 
   if (!Array.isArray(value.transitions)) {
@@ -62,7 +70,8 @@ export function parseStateMachine(value: unknown): StateMachine {
 
     if (!isState(candidate.from)) {
       throw new Error(
-        `Transition ${index} field "from" must be a non-negative integer.`,
+        `Transition ${index} field "from" must be a non-negative integer ` +
+          "or a non-empty tuple of states.",
       );
     }
 
@@ -84,7 +93,8 @@ export function parseStateMachine(value: unknown): StateMachine {
 
     if (!isState(candidate.to)) {
       throw new Error(
-        `Transition ${index} field "to" must be a non-negative integer.`,
+        `Transition ${index} field "to" must be a non-negative integer ` +
+          "or a non-empty tuple of states.",
       );
     }
 
