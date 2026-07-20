@@ -1,14 +1,15 @@
-import type { State, StateMachine, Transition } from "./state-machine.ts";
+import { exploreReachable } from "./reachability.ts";
+import {
+  END_STATE,
+  NO_END,
+  statesEqual,
+  type State,
+  type StateMachine,
+  type Transition,
+} from "./state-machine.ts";
 
 export type CompositeState = State[];
-
-function stateKey(state: State): string {
-  return JSON.stringify(state);
-}
-
-function statesEqual(left: State, right: State): boolean {
-  return stateKey(left) === stateKey(right);
-}
+export type CompositeMachineState = CompositeState | typeof END_STATE;
 
 function enabledTransitions(
   machine: StateMachine,
@@ -27,7 +28,7 @@ function enabledTransitions(
  */
 export function composeStateMachines(
   machines: StateMachine[],
-): StateMachine<CompositeState> {
+): StateMachine<CompositeMachineState> {
   if (machines.length < 2) {
     throw new Error("Composition requires at least two state machines.");
   }
@@ -52,17 +53,37 @@ export function composeStateMachines(
     );
   }
 
-  const initial = machines.map((machine) => machine.initial);
-  const discovered = new Set([stateKey(initial)]);
-  const pending: CompositeState[] = [initial];
-  const transitions: Transition<CompositeState>[] = [];
+  const terminatingMachineIndexes = machines.flatMap((machine, index) =>
+    machine.end !== NO_END ? [index] : [],
+  );
+  const terminatingAlphabet = new Set(
+    terminatingMachineIndexes.flatMap((index) => machines[index]!.alphabet),
+  );
+  const canTerminate =
+    terminatingMachineIndexes.length > 0 &&
+    machines.every(
+      (machine) =>
+        machine.end !== NO_END ||
+        machine.alphabet.every((action) => terminatingAlphabet.has(action)),
+    );
 
-  for (let cursor = 0; cursor < pending.length; cursor += 1) {
-    const compositeState = pending[cursor];
+  function isCompositeEnd(state: CompositeState): boolean {
+    return (
+      canTerminate &&
+      terminatingMachineIndexes.every((index) =>
+        statesEqual(state[index]!, machines[index]!.end),
+      )
+    );
+  }
 
-    if (compositeState === undefined) {
-      continue;
+  function eligibleTransitions(
+    compositeState: CompositeMachineState,
+  ): Transition<CompositeMachineState>[] {
+    if (compositeState === END_STATE) {
+      return [];
     }
+
+    const eligible: Transition<CompositeMachineState>[] = [];
 
     for (const action of alphabet) {
       const participatingMachines = participants.get(action) ?? [];
@@ -100,26 +121,32 @@ export function composeStateMachines(
       }
 
       for (const target of targets) {
-        transitions.push({
+        eligible.push({
           from: [...compositeState],
           action,
-          to: target,
+          to: isCompositeEnd(target) ? END_STATE : target,
         });
-
-        const key = stateKey(target);
-
-        if (!discovered.has(key)) {
-          discovered.add(key);
-          pending.push(target);
-        }
       }
     }
+
+    return eligible;
   }
+
+  const componentInitialState = machines.map((machine) => machine.initial);
+  const initial: CompositeMachineState = isCompositeEnd(componentInitialState)
+    ? END_STATE
+    : componentInitialState;
+  const result = exploreReachable({
+    initial,
+    eligibleTransitions,
+    isEnd: (state) => state === END_STATE,
+  });
 
   return {
     name: machines.map((machine) => machine.name).join(" || "),
     alphabet,
     initial,
-    transitions,
+    end: canTerminate ? END_STATE : NO_END,
+    transitions: result.transitions,
   };
 }

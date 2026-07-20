@@ -2,6 +2,7 @@
   "name": "coin",
   "alphabet": ["tau", "toss", "heads", "tails"],
   "initial": 0,
+  "end": -1,
   "transitions": [
     { "from": 0, "action": "toss", "to": 1 },
     { "from": 0, "action": "toss", "to": 2 },

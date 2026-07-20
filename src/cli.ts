@@ -2,8 +2,10 @@ import { readFile } from "node:fs/promises";
 import { Command } from "commander";
 
 import { composeStateMachines } from "./compose.ts";
+import { detectDeadlocks } from "./reachability.ts";
 import {
   parseStateMachineJson,
+  type State,
   type StateMachine,
 } from "./state-machine.ts";
 
@@ -28,6 +30,39 @@ async function loadStateMachine(path: string): Promise<StateMachine> {
   }
 }
 
+function formatState(state: State): string {
+  return JSON.stringify(state);
+}
+
+function printDeadlockAnalysis(machine: StateMachine): void {
+  const analysis = detectDeadlocks(machine);
+
+  if (analysis.deadlocks.length === 0) {
+    console.log(
+      `No deadlocks found across ${analysis.states.length} reachable state(s).`,
+    );
+    return;
+  }
+
+  console.log(`Deadlocks found: ${analysis.deadlocks.length}`);
+
+  for (const [index, deadlock] of analysis.deadlocks.entries()) {
+    console.log(`\nDeadlock ${index + 1} at ${formatState(deadlock.state)}`);
+
+    if (deadlock.trace.length === 0) {
+      console.log("  The initial state is deadlocked.");
+      continue;
+    }
+
+    for (const transition of deadlock.trace) {
+      console.log(
+        `  ${formatState(transition.from)} --${transition.action}--> ` +
+          formatState(transition.to),
+      );
+    }
+  }
+}
+
 const program = new Command();
 
 program
@@ -43,18 +78,22 @@ program
     "comma-separated process names to compose",
     parseProcessNames,
   )
+  .option("-d, --check-deadlock", "check reachable states for deadlocks")
   .showHelpAfterError()
   .parse();
 
 const options = program.opts<{
   stateMachine: string[];
   compose?: string[];
+  checkDeadlock?: boolean;
 }>();
 
 try {
   const loadedMachines = await Promise.all(
     options.stateMachine.map(loadStateMachine),
   );
+
+  let stateMachine: StateMachine;
 
   if (options.compose === undefined) {
     if (loadedMachines.length !== 1) {
@@ -63,8 +102,8 @@ try {
       );
     }
 
+    stateMachine = loadedMachines[0]!;
     console.log("State machine loaded successfully:");
-    console.log(JSON.stringify(loadedMachines[0], null, 2));
   } else {
     const machinesByName = new Map(
       loadedMachines.map((machine) => [machine.name, machine]),
@@ -78,10 +117,15 @@ try {
 
       return machine;
     });
-    const composite = composeStateMachines(selectedMachines);
-
+    stateMachine = composeStateMachines(selectedMachines);
     console.log("Composite state machine created successfully:");
-    console.log(JSON.stringify(composite, null, 2));
+  }
+
+  console.log(JSON.stringify(stateMachine, null, 2));
+
+  if (options.checkDeadlock === true) {
+    console.log();
+    printDeadlockAnalysis(stateMachine);
   }
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);

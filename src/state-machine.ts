@@ -1,4 +1,7 @@
-export type State = number | State[];
+export const NO_END = -1;
+export const END_STATE = "END";
+
+export type State = number | typeof END_STATE | State[];
 
 export interface Transition<StateType extends State = State> {
   from: StateType;
@@ -10,6 +13,7 @@ export interface StateMachine<StateType extends State = State> {
   name: string;
   alphabet: string[];
   initial: StateType;
+  end: StateType | typeof NO_END;
   transitions: Transition<StateType>[];
 }
 
@@ -22,7 +26,19 @@ function isState(value: unknown): value is State {
     return Number.isInteger(value) && value >= 0;
   }
 
+  if (value === END_STATE) {
+    return true;
+  }
+
   return Array.isArray(value) && value.length > 0 && value.every(isState);
+}
+
+export function stateKey(state: State): string {
+  return JSON.stringify(state);
+}
+
+export function statesEqual(left: State, right: State): boolean {
+  return stateKey(left) === stateKey(right);
 }
 
 /**
@@ -53,6 +69,14 @@ export function parseStateMachine(value: unknown): StateMachine {
   if (!isState(value.initial)) {
     throw new Error(
       '"initial" must be a non-negative integer or a non-empty tuple of states.',
+    );
+  }
+
+  const end = value.end ?? NO_END;
+
+  if (end !== NO_END && !isState(end)) {
+    throw new Error(
+      '"end" must be -1, a state, or the reserved composite state "END".',
     );
   }
 
@@ -109,6 +133,7 @@ export function parseStateMachine(value: unknown): StateMachine {
     name: value.name,
     alphabet: [...value.alphabet],
     initial: value.initial,
+    end,
     transitions,
   };
 }

@@ -2,6 +2,7 @@
   "name": "MAKER",
   "alphabet": ["tau", "make", "ready"],
   "initial": 0,
+  "end": -1,
   "transitions": [
     { "from": 0, "action": "make", "to": 1 },
     { "from": 1, "action": "ready", "to": 0 }
