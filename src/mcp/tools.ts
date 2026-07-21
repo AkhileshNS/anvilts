@@ -6,12 +6,18 @@ import { completeProperty, monitorProperty } from "../property.ts";
 import { buildMachineDot, type GraphOrientation } from "../render.ts";
 import {
   NO_END,
+  isState,
   parseStateMachine,
   stateKey,
   type State,
   type StateMachine,
   type Transition,
 } from "../state-machine.ts";
+import {
+  parseProgressProperty,
+  validateProgressProperties,
+  type ProgressProperty,
+} from "../progress.ts";
 import { verifyStateMachines } from "../verification.ts";
 
 export const DEFAULT_MAX_STATES = 100_000;
@@ -23,6 +29,7 @@ interface CommonInput {
 
 export interface ValidateInput extends CommonInput {
   property?: unknown;
+  progressProperties?: unknown[];
 }
 
 export interface ComposeInput extends CommonInput {
@@ -32,9 +39,11 @@ export interface ComposeInput extends CommonInput {
 export interface VerifyInput extends CommonInput {
   includeSystem?: boolean;
   property?: unknown;
+  progressProperties?: unknown[];
 }
 
 export interface RenderInput extends CommonInput {
+  highlightStates?: unknown[];
   orientation?: GraphOrientation;
   property?: unknown;
   trace?: unknown[];
@@ -112,6 +121,23 @@ function parseProperty(value: unknown | undefined): StateMachine | undefined {
   return value === undefined ? undefined : parseStateMachine(value);
 }
 
+function parseProgressProperties(values: unknown[] | undefined): ProgressProperty[] {
+  return (values ?? []).map(parseProgressProperty);
+}
+
+function parseHighlightStates(values: unknown[] | undefined): State[] {
+  if (!values) {
+    return [];
+  }
+
+  return values.map((value, index) => {
+    if (!isState(value)) {
+      throw new Error(`Highlighted state ${index} is not a valid LTS state.`);
+    }
+    return value;
+  });
+}
+
 function parseTrace(values: unknown[] | undefined): Transition[] {
   if (!values || values.length === 0) {
     return [];
@@ -151,6 +177,7 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
   return runSafely(() => {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
+    const progressProperties = parseProgressProperties(input.progressProperties);
     const systemAlphabet = new Set(machines.flatMap((machine) => machine.alphabet));
     let completedProperty: StateMachine | undefined;
 
@@ -164,6 +191,7 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
         }
       }
     }
+    validateProgressProperties(progressProperties, systemAlphabet);
 
     const result = {
       valid: true,
@@ -174,6 +202,10 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
             completedTransitions: completedProperty!.transitions.length,
           }
         : null,
+      progressProperties: progressProperties.map((progress) => ({
+        ...progress,
+        fairness: "fair-choice",
+      })),
       synchronization: {
         rule: "Non-tau actions synchronize across every component whose alphabet contains them; tau always interleaves privately.",
         sharedActions: [...systemAlphabet].filter(
@@ -185,7 +217,7 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
     };
 
     return toolResult(
-      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}.`,
+      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.`,
       result,
     );
   });
@@ -222,8 +254,10 @@ export function verifyLtsTool(input: VerifyInput): Promise<CallToolResult> {
   return runSafely(() => {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
+    const progressProperties = parseProgressProperties(input.progressProperties);
     const report = verifyStateMachines(machines, property, {
       maxStates: stateLimit(input),
+      progressProperties,
     });
     const finding = report.finding
       ? {
@@ -233,6 +267,9 @@ export function verifyLtsTool(input: VerifyInput): Promise<CallToolResult> {
           state: report.finding.state,
           trace: report.finding.trace,
           actions: report.finding.trace.map((step) => step.action),
+          terminalStates: report.finding.terminalStates ?? null,
+          recurringActions: report.finding.recurringActions ?? null,
+          fairness: report.finding.fairness ?? null,
         }
       : null;
     const result: Record<string, unknown> = {
@@ -251,14 +288,35 @@ export function verifyLtsTool(input: VerifyInput): Promise<CallToolResult> {
             reachableProductTransitions: report.property.reachability.transitions.length,
           }
         : null,
+      progress: report.progress
+        ? {
+            fairness: report.progress.fairness,
+            terminalComponents: report.progress.terminalComponents.length,
+            properties: report.progress.results.map((progressResult) => ({
+              ...progressResult.property,
+              satisfied: progressResult.satisfied,
+              violation: progressResult.violation
+                ? {
+                    prefixTrace: progressResult.violation.prefixTrace,
+                    terminalStates: progressResult.violation.terminalStates,
+                    recurringActions: progressResult.violation.recurringActions,
+                    missingProgressActions:
+                      progressResult.violation.missingProgressActions,
+                  }
+                : null,
+            })),
+          }
+        : null,
     };
     if (input.includeSystem) {
       result.composedSystem = report.system;
     }
 
     const message = report.passed
-      ? `No deadlock, ERROR state, or supplied safety-property violation was reachable in ${report.systemReachability.states.length} explored system states.`
-      : `${report.finding!.title}. Shortest counterexample: ${report.finding!.trace.map((step) => step.action).join(" → ") || "initial state"}.`;
+      ? `No deadlock, ERROR state, supplied safety-property violation, or fair-choice progress violation was found in ${report.systemReachability.states.length} explored system states.`
+      : report.finding!.kind === "progress-violation"
+        ? `${report.finding!.title} under fair-choice semantics. Shortest trace to the violating terminal component: ${report.finding!.trace.map((step) => step.action).join(" -> ") || "initial state"}.`
+        : `${report.finding!.title}. Shortest counterexample: ${report.finding!.trace.map((step) => step.action).join(" -> ") || "initial state"}.`;
     return toolResult(message, result);
   });
 }
@@ -275,8 +333,10 @@ export function renderLtsTool(input: RenderInput): Promise<CallToolResult> {
       ? monitorProperty(system, property, { maxStates: stateLimit(input) })
       : system;
     const trace = parseTrace(input.trace);
+    const highlightStates = parseHighlightStates(input.highlightStates);
     const dot = buildMachineDot(machine, {
       background: "dark",
+      highlightStates,
       orientation: input.orientation ?? "horizontal",
       trace,
     });
@@ -286,8 +346,13 @@ export function renderLtsTool(input: RenderInput): Promise<CallToolResult> {
     const summary = summarizeMachine(machine);
 
     return toolResult(
-      `Rendered ${machine.name} as an SVG state graph${trace.length ? ` with ${trace.length} counterexample steps highlighted` : ""}.`,
-      { rendered: true, summary, traceLength: trace.length },
+      `Rendered ${machine.name} as an SVG state graph${trace.length ? ` with ${trace.length} counterexample steps highlighted` : ""}${highlightStates.length ? ` and ${highlightStates.length} recurrent states highlighted` : ""}.`,
+      {
+        rendered: true,
+        summary,
+        traceLength: trace.length,
+        highlightedStates: highlightStates.length,
+      },
       [
         {
           type: "resource",

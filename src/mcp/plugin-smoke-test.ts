@@ -40,6 +40,29 @@ const svgResource = rendering.content.find((item) => item.type === "resource");
 assert(svgResource && "text" in svgResource.resource);
 assert.match(svgResource.resource.text, /<svg[\s>]/);
 
+const progress = (await client.callTool({
+  name: "verify_lts",
+  arguments: {
+    machines: [coin],
+    progressProperties: [
+      {
+        name: "heads-continue",
+        type: "progress",
+        actions: ["heads"],
+      },
+    ],
+  },
+})) as CallToolResult;
+assert.equal(progress.isError, undefined);
+assert.equal(progress.structuredContent?.passed, true);
+assert.equal(
+  (progress.structuredContent?.progress as { fairness?: string } | undefined)
+    ?.fairness,
+  "fair-choice",
+);
+
 await client.close();
 
-console.log("Bundled AnviLTS plugin smoke test passed: stdio launch, 4 tools, SVG render.");
+console.log(
+  "Bundled AnviLTS plugin smoke test passed: stdio launch, 4 tools, fair-choice progress, and SVG render.",
+);

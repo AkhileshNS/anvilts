@@ -1,7 +1,7 @@
 {
   "name": "anvilts",
-  "version": "0.1.0+codex.20260721052140",
-  "description": "Repository-aware formal verification for concurrent systems using labelled transition systems.",
+  "version": "0.1.0+codex.20260721062807",
+  "description": "Repository-aware safety and progress verification for concurrent systems using labelled transition systems.",
   "author": {
     "name": "Akhilesh NS"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "AnviLTS",
     "shortDescription": "Model-check concurrent code with LTS.",
-    "longDescription": "Inspect concurrent code with Codex, confirm a finite abstraction with the user, then deterministically check deadlocks and safety properties with shortest counterexamples and SVG state graphs.",
+    "longDescription": "Inspect concurrent code with Codex, confirm a finite abstraction with the user, then deterministically check deadlocks, safety properties, and LTSA-style fair-choice progress with shortest diagnostics and SVG state graphs.",
     "developerName": "Akhilesh NS",
     "category": "Developer Tools",
     "capabilities": [
@@ -17,6 +17,7 @@
       "LTS composition",
       "Deadlock detection",
       "Safety-property verification",
+      "Fair-choice progress verification",
       "Counterexample visualization"
     ],
     "defaultPrompt": [

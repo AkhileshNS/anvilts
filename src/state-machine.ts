@@ -27,7 +27,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isState(value: unknown): value is State {
+export function isState(value: unknown): value is State {
   if (typeof value === "number") {
     return Number.isInteger(value) && value >= 0;
   }

@@ -109,7 +109,7 @@ FSP compiler:
 - Preserve nondeterministic behavior.
 - Compose component machines according to explicit synchronization rules.
 - Explore reachable composite states.
-- Check safety and other supported behavioral properties.
+- Check safety and LTSA-style fair-choice progress properties.
 - Produce reproducible counterexample traces.
 - Expose sufficient intermediate data for visualization and explanation.
 
@@ -143,7 +143,7 @@ The first useful version should:
 - Represent and validate component state machines in TypeScript.
 - Compose multiple machines using LTSA-compatible action synchronization.
 - Enumerate the reachable composite state space.
-- Detect at least deadlocks and safety-property violations.
+- Detect deadlocks, safety-property violations, and fair-choice progress violations.
 - Return minimal, understandable counterexample traces.
 - Demonstrate a broken concurrent design, explain its failure, apply a change,
   and verify the revised model.

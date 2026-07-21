@@ -1,6 +1,6 @@
 # AnviLTS
 
-AnviLTS is an MCP server for a reconstructed LTSA (Labelled Transition System Analyser) engine. It makes LTSA's academic safety-verification capabilities available to users and AI coding agents through structured tools for modelling, composition, deadlock detection, safety-property verification, and counterexample visualization.
+AnviLTS is an MCP server for a reconstructed LTSA (Labelled Transition System Analyser) engine. It makes LTSA's academic verification capabilities available to users and AI coding agents through structured tools for modelling, composition, deadlock detection, safety-property verification, fair-choice progress analysis, and counterexample visualization.
 
 An agent can inspect concurrent code, construct a finite labelled transition system with the user, and submit that model to AnviLTS for exhaustive verification. This gives LLMs a mathematical way to test their concurrency claims, reducing the risk that a plausible explanation or proposed fix is accepted without proof.
 
@@ -9,7 +9,7 @@ flowchart LR
     A["Repository + verification question"] --> B["Agent inspects concurrent behavior"]
     B --> C["User confirms the finite abstraction"]
     C --> D["AnviLTS composes the component LTSes"]
-    D --> E["Exhaustive deadlock and safety check"]
+    D --> E["Exhaustive deadlock, safety, and progress check"]
     E --> F["Shortest trace + optional SVG graph"]
 ```
 
@@ -17,10 +17,10 @@ flowchart LR
 
 AnviLTS runs as a local MCP server using the `stdio` transport and exposes four tools:
 
-- `validate_model`: validate component LTS definitions and optional safety monitors.
+- `validate_model`: validate component LTS definitions, optional safety monitors, and progress properties.
 - `compose_lts`: construct the reachable parallel composition.
-- `verify_lts`: detect deadlocks, reserved ERROR states, and safety-property violations.
-- `render_lts`: render a dark SVG state graph with an optional highlighted trace.
+- `verify_lts`: detect deadlocks, reserved ERROR states, safety-property violations, and LTSA-style progress violations.
+- `render_lts`: render a dark SVG state graph with an optional highlighted trace or recurrent terminal component.
 
 The included Codex plugin provides the repository-inspection, model-review, verification, and counterexample-explanation workflow.
 
@@ -89,6 +89,7 @@ AnviLTS proves the approved model under its stated assumptions. It does not clai
 ```sh
 npm install
 npm run typecheck
+npm run test:progress
 npm run test:mcp
 npm run build
 npm run test:plugin
@@ -105,6 +106,8 @@ npm run parity
 - Reachable non-END states with no eligible transition are deadlocks.
 - Safety properties are passive deterministic monitors; disallowed relevant actions enter ERROR.
 - Breadth-first parent links produce a shortest counterexample trace.
+- Progress properties are checked over cyclic terminal strongly connected components under LTSA fair-choice semantics.
+- Conditional progress requires a progress action to recur whenever a condition action recurs; it is not a per-request response guarantee.
 - MCP calls default to a 100,000 reachable-state limit to prevent accidental state explosion.
 
 See [IDEA.md](IDEA.md) for the product rationale and [the model reference](plugins/anvilts/skills/verify-concurrent-system/references/lts-model.md) for the JSON contract.

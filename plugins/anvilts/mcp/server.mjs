@@ -9936,13 +9936,13 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     }
     return propValues;
   });
-  const isObject3 = isObject;
+  const isObject4 = isObject;
   const catchall = def.catchall;
   let value;
   inst._zod.parse = (payload, ctx) => {
     value ?? (value = _normalized.value);
     const input = payload.value;
-    if (!isObject3(input)) {
+    if (!isObject4(input)) {
       payload.issues.push({
         expected: "object",
         code: "invalid_type",
@@ -10069,7 +10069,7 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
     return (payload, ctx) => fn(shape, payload, ctx);
   };
   let fastpass;
-  const isObject3 = isObject;
+  const isObject4 = isObject;
   const jit = !globalConfig.jitless;
   const allowsEval2 = allowsEval;
   const fastEnabled = jit && allowsEval2.value;
@@ -10078,7 +10078,7 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
   inst._zod.parse = (payload, ctx) => {
     value ?? (value = _normalized.value);
     const input = payload.value;
-    if (!isObject3(input)) {
+    if (!isObject4(input)) {
       payload.issues.push({
         expected: "object",
         code: "invalid_type",
@@ -34381,6 +34381,9 @@ function buildMachineDot(machine, options = {}) {
     ])
   );
   const traceTransitions = new Set((options.trace ?? []).map(transitionKey));
+  const highlightedStates = new Set(
+    (options.highlightStates ?? []).map(stateKey)
+  );
   const states = collectStates(machine);
   const nodeIdByState = new Map(
     states.map((state, index) => [stateKey(state), `state_${index}`])
@@ -34390,33 +34393,35 @@ function buildMachineDot(machine, options = {}) {
     const isEnd = machine.end !== NO_END && statesEqual(state, machine.end);
     const isError = statesEqual(state, ERROR_STATE);
     const isInTrace = traceStates.has(stateKey(state));
-    const color = isError ? "#ff8585" : isCurrent ? "#f4f5f4" : isInTrace ? "#f0b35a" : "#626262";
-    const fill = isError ? "#321b1b" : isCurrent ? "#f4f5f4" : isInTrace ? "#2a2116" : "#151515";
+    const isHighlighted = highlightedStates.has(stateKey(state));
+    const color = isError ? "#ff8585" : isCurrent ? "#f4f5f4" : isInTrace ? "#f0b35a" : isHighlighted ? "#a78bfa" : "#626262";
+    const fill = isError ? "#321b1b" : isCurrent ? "#f4f5f4" : isInTrace ? "#2a2116" : isHighlighted ? "#211a36" : "#151515";
     const font = isCurrent ? "#101010" : isError ? "#ffb8b8" : "#dedede";
     const attributes = [
       `id="state-${index}"`,
       `label="${escapeDot(displayState(state))}"`,
       `shape="${isError ? "diamond" : isEnd ? "doublecircle" : "circle"}"`,
-      `class="state-node${isCurrent ? " current-state" : ""}${isInTrace ? " trace-state" : ""}"`,
+      `class="state-node${isCurrent ? " current-state" : ""}${isInTrace ? " trace-state" : ""}${isHighlighted ? " highlighted-state" : ""}"`,
       `color="${color}"`,
       `fillcolor="${fill}"`,
       `fontcolor="${font}"`,
-      `penwidth="${isCurrent || isInTrace ? "2.4" : "1.3"}"`
+      `penwidth="${isCurrent || isInTrace || isHighlighted ? "2.4" : "1.3"}"`
     ];
     return `${nodeIdByState.get(stateKey(state))} [${attributes.join(", ")}];`;
   });
   const edges = machine.transitions.map((transition, index) => {
     const enabled = statesEqual(transition.from, current);
     const isInTrace = traceTransitions.has(transitionKey(transition));
-    const color = isInTrace ? "#f0b35a" : enabled ? "#f4f5f4" : "#4a4a4a";
-    const font = isInTrace ? "#ffd18d" : enabled ? "#f4f5f4" : "#888888";
+    const isHighlighted = highlightedStates.has(stateKey(transition.from)) && highlightedStates.has(stateKey(transition.to));
+    const color = isInTrace ? "#f0b35a" : enabled ? "#f4f5f4" : isHighlighted ? "#a78bfa" : "#4a4a4a";
+    const font = isInTrace ? "#ffd18d" : enabled ? "#f4f5f4" : isHighlighted ? "#c4b5fd" : "#888888";
     const attributes = [
       `id="transition-${index}"`,
       `label="${escapeDot(transition.action)}"`,
-      `class="transition-edge${enabled ? " enabled-transition" : ""}${isInTrace ? " trace-transition" : ""}"`,
+      `class="transition-edge${enabled ? " enabled-transition" : ""}${isInTrace ? " trace-transition" : ""}${isHighlighted ? " highlighted-transition" : ""}"`,
       `color="${color}"`,
       `fontcolor="${font}"`,
-      `penwidth="${isInTrace || enabled ? "2.4" : "1.1"}"`
+      `penwidth="${isInTrace || enabled || isHighlighted ? "2.4" : "1.1"}"`
     ];
     return `${nodeIdByState.get(stateKey(transition.from))} -> ${nodeIdByState.get(
       stateKey(transition.to)
@@ -34432,6 +34437,269 @@ function buildMachineDot(machine, options = {}) {
     ${nodes.join("\n")}
     ${edges.join("\n")}
   }`;
+}
+
+// src/progress.ts
+function isObject3(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function parseActionSet(value, field) {
+  if (!Array.isArray(value) || value.length === 0 || !value.every(
+    (action) => typeof action === "string" && action.trim().length > 0
+  )) {
+    throw new Error(`${field} must be a non-empty array of action names.`);
+  }
+  if (new Set(value).size !== value.length) {
+    throw new Error(`${field} must not contain duplicate actions.`);
+  }
+  if (value.includes(TAU)) {
+    throw new Error(`${field} must not include the internal action "tau".`);
+  }
+  return [...value];
+}
+function parseProgressProperty(value) {
+  if (!isObject3(value)) {
+    throw new Error("A progress property must be a JSON object.");
+  }
+  if (typeof value.name !== "string" || value.name.trim().length === 0) {
+    throw new Error('Progress property "name" must be a non-empty string.');
+  }
+  if (value.type === "progress") {
+    return {
+      name: value.name,
+      type: value.type,
+      actions: parseActionSet(value.actions, 'Progress property "actions"')
+    };
+  }
+  if (value.type === "conditional-progress") {
+    return {
+      name: value.name,
+      type: value.type,
+      conditionActions: parseActionSet(
+        value.conditionActions,
+        'Conditional progress property "conditionActions"'
+      ),
+      progressActions: parseActionSet(
+        value.progressActions,
+        'Conditional progress property "progressActions"'
+      )
+    };
+  }
+  throw new Error(
+    'Progress property "type" must be "progress" or "conditional-progress".'
+  );
+}
+function propertyActions(property) {
+  return property.type === "progress" ? property.actions : [...property.conditionActions, ...property.progressActions];
+}
+function validateProgressProperties(properties, systemAlphabet) {
+  const alphabet = new Set(systemAlphabet);
+  const names = /* @__PURE__ */ new Set();
+  for (const property of properties) {
+    if (names.has(property.name)) {
+      throw new Error(
+        `Progress property names must be unique; duplicate ${JSON.stringify(property.name)}.`
+      );
+    }
+    names.add(property.name);
+    for (const action of propertyActions(property)) {
+      if (!alphabet.has(action)) {
+        throw new Error(
+          `Progress property ${JSON.stringify(property.name)} action ${JSON.stringify(action)} is not in the system alphabet.`
+        );
+      }
+    }
+  }
+}
+function buildGraph(reachability) {
+  const stateByKey = new Map(
+    reachability.states.map((state) => [stateKey(state), state])
+  );
+  const outgoing = /* @__PURE__ */ new Map();
+  const incoming = /* @__PURE__ */ new Map();
+  for (const key of stateByKey.keys()) {
+    outgoing.set(key, []);
+    incoming.set(key, []);
+  }
+  for (const transition of reachability.transitions) {
+    const from = stateKey(transition.from);
+    const to = stateKey(transition.to);
+    outgoing.get(from)?.push(transition);
+    incoming.get(to)?.push(from);
+  }
+  return { stateByKey, outgoing, incoming };
+}
+function finishOrder(graph) {
+  const visited = /* @__PURE__ */ new Set();
+  const order = [];
+  for (const start of graph.stateByKey.keys()) {
+    if (visited.has(start)) {
+      continue;
+    }
+    visited.add(start);
+    const stack = [{ key: start, next: 0 }];
+    while (stack.length > 0) {
+      const frame = stack.at(-1);
+      const transitions = graph.outgoing.get(frame.key) ?? [];
+      if (frame.next < transitions.length) {
+        const transition = transitions[frame.next];
+        frame.next += 1;
+        const next = stateKey(transition.to);
+        if (!visited.has(next)) {
+          visited.add(next);
+          stack.push({ key: next, next: 0 });
+        }
+        continue;
+      }
+      order.push(frame.key);
+      stack.pop();
+    }
+  }
+  return order;
+}
+function stronglyConnectedComponents(graph) {
+  const assigned = /* @__PURE__ */ new Set();
+  const components = [];
+  const order = finishOrder(graph);
+  for (let index = order.length - 1; index >= 0; index -= 1) {
+    const start = order[index];
+    if (assigned.has(start)) {
+      continue;
+    }
+    const component = [];
+    const stack = [start];
+    assigned.add(start);
+    while (stack.length > 0) {
+      const key = stack.pop();
+      component.push(key);
+      for (const previous of graph.incoming.get(key) ?? []) {
+        if (!assigned.has(previous)) {
+          assigned.add(previous);
+          stack.push(previous);
+        }
+      }
+    }
+    components.push(component);
+  }
+  return components;
+}
+function shortestTraceTo(initial, targets, outgoing) {
+  const initialKey = stateKey(initial);
+  if (targets.has(initialKey)) {
+    return [];
+  }
+  const visited = /* @__PURE__ */ new Set([initialKey]);
+  const queue = [initialKey];
+  const parents = /* @__PURE__ */ new Map();
+  let found;
+  for (let cursor2 = 0; cursor2 < queue.length && found === void 0; cursor2 += 1) {
+    const key = queue[cursor2];
+    for (const transition of outgoing.get(key) ?? []) {
+      const next = stateKey(transition.to);
+      if (visited.has(next)) {
+        continue;
+      }
+      visited.add(next);
+      parents.set(next, { previous: key, transition });
+      if (targets.has(next)) {
+        found = next;
+        break;
+      }
+      queue.push(next);
+    }
+  }
+  if (found === void 0) {
+    throw new Error("Internal error: terminal component is not reachable.");
+  }
+  const trace = [];
+  let cursor = found;
+  while (cursor !== initialKey) {
+    const parent = parents.get(cursor);
+    trace.unshift(parent.transition);
+    cursor = parent.previous;
+  }
+  return trace;
+}
+function terminalComponents(machine, reachability) {
+  const graph = buildGraph(reachability);
+  const terminal = [];
+  for (const componentKeys of stronglyConnectedComponents(graph)) {
+    const keys = new Set(componentKeys);
+    const transitions = componentKeys.flatMap(
+      (key) => graph.outgoing.get(key) ?? []
+    );
+    const hasOutgoing = transitions.some(
+      (transition) => !keys.has(stateKey(transition.to))
+    );
+    if (hasOutgoing) {
+      continue;
+    }
+    const internalTransitions = transitions.filter(
+      (transition) => keys.has(stateKey(transition.to))
+    );
+    const supportsInfiniteExecution = componentKeys.length > 1 || internalTransitions.some(
+      (transition) => stateKey(transition.from) === stateKey(transition.to)
+    );
+    if (!supportsInfiniteExecution) {
+      continue;
+    }
+    const states = componentKeys.map((key) => graph.stateByKey.get(key));
+    terminal.push({
+      states,
+      transitions: internalTransitions,
+      actions: [...new Set(internalTransitions.map((edge) => edge.action))].sort(),
+      prefixTrace: shortestTraceTo(machine.initial, keys, graph.outgoing)
+    });
+  }
+  return terminal.sort((left, right) => {
+    const lengthDifference = left.prefixTrace.length - right.prefixTrace.length;
+    if (lengthDifference !== 0) {
+      return lengthDifference;
+    }
+    return stateKey(left.states[0]).localeCompare(stateKey(right.states[0]));
+  });
+}
+function violationFor(property, component) {
+  const recurring = new Set(component.actions);
+  const progressActions = property.type === "progress" ? property.actions : property.progressActions;
+  const hasProgress = progressActions.some((action) => recurring.has(action));
+  if (property.type === "conditional-progress") {
+    const conditionOccurs = property.conditionActions.some(
+      (action) => recurring.has(action)
+    );
+    if (!conditionOccurs || hasProgress) {
+      return void 0;
+    }
+  } else if (hasProgress) {
+    return void 0;
+  }
+  return {
+    property,
+    terminalStates: component.states,
+    recurringActions: component.actions,
+    missingProgressActions: [...progressActions],
+    prefixTrace: component.prefixTrace
+  };
+}
+function analyzeProgress(machine, reachability, properties) {
+  validateProgressProperties(properties, machine.alphabet);
+  const components = terminalComponents(machine, reachability);
+  const results = properties.map((property) => {
+    const violation = components.map((component) => violationFor(property, component)).find((candidate) => candidate !== void 0);
+    return {
+      property,
+      satisfied: violation === void 0,
+      ...violation ? { violation } : {}
+    };
+  });
+  return {
+    fairness: "fair-choice",
+    terminalComponents: components,
+    results,
+    violations: results.flatMap(
+      (result) => result.violation ? [result.violation] : []
+    )
+  };
 }
 
 // src/verification.ts
@@ -34465,6 +34733,20 @@ function findingFromPropertyViolation(violation, property) {
     monitored: true
   };
 }
+function findingFromProgressViolation(violation) {
+  const entryState = violation.prefixTrace.at(-1)?.to ?? violation.terminalStates[0];
+  return {
+    kind: "progress-violation",
+    title: `${violation.property.name} is violated`,
+    description: "A fair infinite execution can remain in a terminal component without the required progress actions.",
+    trace: violation.prefixTrace,
+    state: entryState,
+    monitored: false,
+    terminalStates: violation.terminalStates,
+    recurringActions: violation.recurringActions,
+    fairness: "fair-choice"
+  };
+}
 function verifyStateMachines(machines, propertyDefinition, options = {}) {
   if (machines.length === 0) {
     throw new Error("Verification requires at least one state machine.");
@@ -34472,6 +34754,7 @@ function verifyStateMachines(machines, propertyDefinition, options = {}) {
   const system = machines.length === 1 ? machines[0] : composeStateMachines(machines, options);
   const systemReachability = detectDeadlocks(system);
   let property;
+  const progress = options.progressProperties?.length ? analyzeProgress(system, systemReachability, options.progressProperties) : void 0;
   if (propertyDefinition) {
     const monitoredSystem = monitorProperty(system, propertyDefinition, options);
     property = {
@@ -34483,11 +34766,13 @@ function verifyStateMachines(machines, propertyDefinition, options = {}) {
   const propertyViolation = property?.reachability.violations[0];
   const modelError = systemReachability.violations[0];
   const deadlock = systemReachability.deadlocks[0];
-  const finding = propertyViolation ? findingFromPropertyViolation(propertyViolation, property.definition) : modelError ? findingFromModelError(modelError) : deadlock ? findingFromDeadlock(deadlock) : void 0;
+  const progressViolation = progress?.violations[0];
+  const finding = propertyViolation ? findingFromPropertyViolation(propertyViolation, property.definition) : modelError ? findingFromModelError(modelError) : deadlock ? findingFromDeadlock(deadlock) : progressViolation ? findingFromProgressViolation(progressViolation) : void 0;
   return {
     system,
     systemReachability,
     property,
+    progress,
     finding,
     passed: finding === void 0
   };
@@ -34552,6 +34837,20 @@ function summarizeMachine(machine) {
 function parseProperty(value) {
   return value === void 0 ? void 0 : parseStateMachine(value);
 }
+function parseProgressProperties(values) {
+  return (values ?? []).map(parseProgressProperty);
+}
+function parseHighlightStates(values) {
+  if (!values) {
+    return [];
+  }
+  return values.map((value, index) => {
+    if (!isState(value)) {
+      throw new Error(`Highlighted state ${index} is not a valid LTS state.`);
+    }
+    return value;
+  });
+}
 function parseTrace(values) {
   if (!values || values.length === 0) {
     return [];
@@ -34580,6 +34879,7 @@ function validateModelTool(input) {
   return runSafely(() => {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
+    const progressProperties = parseProgressProperties(input.progressProperties);
     const systemAlphabet = new Set(machines.flatMap((machine) => machine.alphabet));
     let completedProperty;
     if (property) {
@@ -34592,6 +34892,7 @@ function validateModelTool(input) {
         }
       }
     }
+    validateProgressProperties(progressProperties, systemAlphabet);
     const result = {
       valid: true,
       components: machines.map(summarizeMachine),
@@ -34599,6 +34900,10 @@ function validateModelTool(input) {
         ...summarizeMachine(property),
         completedTransitions: completedProperty.transitions.length
       } : null,
+      progressProperties: progressProperties.map((progress) => ({
+        ...progress,
+        fairness: "fair-choice"
+      })),
       synchronization: {
         rule: "Non-tau actions synchronize across every component whose alphabet contains them; tau always interleaves privately.",
         sharedActions: [...systemAlphabet].filter(
@@ -34607,7 +34912,7 @@ function validateModelTool(input) {
       }
     };
     return toolResult(
-      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}.`,
+      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.`,
       result
     );
   });
@@ -34640,8 +34945,10 @@ function verifyLtsTool(input) {
   return runSafely(() => {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
+    const progressProperties = parseProgressProperties(input.progressProperties);
     const report = verifyStateMachines(machines, property, {
-      maxStates: stateLimit(input)
+      maxStates: stateLimit(input),
+      progressProperties
     });
     const finding = report.finding ? {
       kind: report.finding.kind,
@@ -34649,7 +34956,10 @@ function verifyLtsTool(input) {
       description: report.finding.description,
       state: report.finding.state,
       trace: report.finding.trace,
-      actions: report.finding.trace.map((step) => step.action)
+      actions: report.finding.trace.map((step) => step.action),
+      terminalStates: report.finding.terminalStates ?? null,
+      recurringActions: report.finding.recurringActions ?? null,
+      fairness: report.finding.fairness ?? null
     } : null;
     const result = {
       passed: report.passed,
@@ -34664,12 +34974,26 @@ function verifyLtsTool(input) {
         name: report.property.definition.name,
         reachableProductStates: report.property.reachability.states.length,
         reachableProductTransitions: report.property.reachability.transitions.length
+      } : null,
+      progress: report.progress ? {
+        fairness: report.progress.fairness,
+        terminalComponents: report.progress.terminalComponents.length,
+        properties: report.progress.results.map((progressResult) => ({
+          ...progressResult.property,
+          satisfied: progressResult.satisfied,
+          violation: progressResult.violation ? {
+            prefixTrace: progressResult.violation.prefixTrace,
+            terminalStates: progressResult.violation.terminalStates,
+            recurringActions: progressResult.violation.recurringActions,
+            missingProgressActions: progressResult.violation.missingProgressActions
+          } : null
+        }))
       } : null
     };
     if (input.includeSystem) {
       result.composedSystem = report.system;
     }
-    const message = report.passed ? `No deadlock, ERROR state, or supplied safety-property violation was reachable in ${report.systemReachability.states.length} explored system states.` : `${report.finding.title}. Shortest counterexample: ${report.finding.trace.map((step) => step.action).join(" \u2192 ") || "initial state"}.`;
+    const message = report.passed ? `No deadlock, ERROR state, supplied safety-property violation, or fair-choice progress violation was found in ${report.systemReachability.states.length} explored system states.` : report.finding.kind === "progress-violation" ? `${report.finding.title} under fair-choice semantics. Shortest trace to the violating terminal component: ${report.finding.trace.map((step) => step.action).join(" -> ") || "initial state"}.` : `${report.finding.title}. Shortest counterexample: ${report.finding.trace.map((step) => step.action).join(" -> ") || "initial state"}.`;
     return toolResult(message, result);
   });
 }
@@ -34680,8 +35004,10 @@ function renderLtsTool(input) {
     const property = parseProperty(input.property);
     const machine = property ? monitorProperty(system, property, { maxStates: stateLimit(input) }) : system;
     const trace = parseTrace(input.trace);
+    const highlightStates = parseHighlightStates(input.highlightStates);
     const dot = buildMachineDot(machine, {
       background: "dark",
+      highlightStates,
       orientation: input.orientation ?? "horizontal",
       trace
     });
@@ -34690,8 +35016,13 @@ function renderLtsTool(input) {
     const slug = machine.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "lts";
     const summary = summarizeMachine(machine);
     return toolResult(
-      `Rendered ${machine.name} as an SVG state graph${trace.length ? ` with ${trace.length} counterexample steps highlighted` : ""}.`,
-      { rendered: true, summary, traceLength: trace.length },
+      `Rendered ${machine.name} as an SVG state graph${trace.length ? ` with ${trace.length} counterexample steps highlighted` : ""}${highlightStates.length ? ` and ${highlightStates.length} recurrent states highlighted` : ""}.`,
+      {
+        rendered: true,
+        summary,
+        traceLength: trace.length,
+        highlightedStates: highlightStates.length
+      },
       [
         {
           type: "resource",
@@ -34726,6 +35057,26 @@ var machineSchema = external_exports.object({
   transitions: external_exports.array(transitionSchema)
 });
 var machinesSchema = external_exports.array(machineSchema).min(1).describe("Component LTS definitions approved by the user.");
+var actionSetSchema = external_exports.array(external_exports.string().min(1)).min(1).describe('Observable action names; the internal action "tau" is not allowed.');
+var progressPropertySchema = external_exports.discriminatedUnion("type", [
+  external_exports.object({
+    name: external_exports.string().min(1),
+    type: external_exports.literal("progress"),
+    actions: actionSetSchema.describe(
+      "At least one of these actions must occur infinitely often."
+    )
+  }),
+  external_exports.object({
+    name: external_exports.string().min(1),
+    type: external_exports.literal("conditional-progress"),
+    conditionActions: actionSetSchema.describe(
+      "If any of these actions occurs infinitely often, progress is required."
+    ),
+    progressActions: actionSetSchema.describe(
+      "At least one of these actions must then occur infinitely often."
+    )
+  })
+]);
 var maxStatesSchema = external_exports.number().int().min(100).max(5e5).optional().describe("Maximum reachable states before aborting; defaults to 100000.");
 var readOnlyAnnotations = {
   readOnlyHint: true,
@@ -34737,17 +35088,18 @@ function createAnviLtsServer() {
   const server2 = new McpServer(
     { name: "anvilts", version: "0.1.0" },
     {
-      instructions: "Deterministic labelled-transition-system validation, composition, safety verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model."
+      instructions: "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model and its assumptions."
     }
   );
   server2.registerTool(
     "validate_model",
     {
       title: "Validate LTS model",
-      description: "Validate component LTS JSON and an optional passive safety-property monitor before composition. Use after the user confirms the proposed components, actions, assumptions, and verification question.",
+      description: "Validate component LTS JSON, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use after the user confirms the proposed components, actions, fairness assumptions, and verification question.",
       inputSchema: {
         machines: machinesSchema,
-        property: machineSchema.optional()
+        property: machineSchema.optional(),
+        progressProperties: external_exports.array(progressPropertySchema).optional()
       },
       annotations: readOnlyAnnotations
     },
@@ -34771,10 +35123,11 @@ function createAnviLtsServer() {
     "verify_lts",
     {
       title: "Verify concurrent model",
-      description: "Exhaustively explore the reachable model, detecting deadlocks, reserved ERROR states, and optional safety-monitor violations. Returns a shortest counterexample trace. This proves the approved finite abstraction, not source-code equivalence.",
+      description: "Exhaustively explore the reachable model, detecting deadlocks, reserved ERROR states, optional safety-monitor violations, and LTSA-style progress violations under fair-choice semantics. Returns shortest finite prefixes to failures or violating terminal components. This proves the approved finite abstraction, not source-code equivalence.",
       inputSchema: {
         machines: machinesSchema,
         property: machineSchema.optional(),
+        progressProperties: external_exports.array(progressPropertySchema).optional(),
         includeSystem: external_exports.boolean().optional().describe("Include the full reachable system LTS; defaults to false."),
         maxStates: maxStatesSchema
       },
@@ -34791,6 +35144,9 @@ function createAnviLtsServer() {
         machines: machinesSchema,
         property: machineSchema.optional().describe("Include the safety property when rendering a property-violation trace."),
         trace: external_exports.array(transitionSchema).optional().describe("Optional counterexample trace returned by verify_lts."),
+        highlightStates: external_exports.array(stateSchema).optional().describe(
+          "Optional recurrent terminal-component states returned by a progress violation."
+        ),
         orientation: external_exports.enum(["horizontal", "vertical"]).optional(),
         maxStates: maxStatesSchema
       },

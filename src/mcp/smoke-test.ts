@@ -53,7 +53,17 @@ assert.deepEqual(
 
 const validation = (await client.callTool({
   name: "validate_model",
-  arguments: { machines: [workerA, workerB], property: mutexProperty },
+  arguments: {
+    machines: [workerA, workerB],
+    property: mutexProperty,
+    progressProperties: [
+      {
+        name: "worker-a-continues",
+        type: "progress",
+        actions: ["a.exit"],
+      },
+    ],
+  },
 })) as CallToolResult;
 assert.equal(validation.isError, undefined);
 assert.equal(validation.structuredContent?.valid, true);
@@ -84,6 +94,56 @@ const svgResource = rendering.content.find((item) => item.type === "resource");
 assert(svgResource && "text" in svgResource.resource);
 assert.match(svgResource.resource.text, /<svg[\s>]/);
 
+const retryingWorker = {
+  name: "retrying-worker",
+  alphabet: ["start", "job.accepted", "job.retry", "job.completed"],
+  initial: 0,
+  transitions: [
+    { from: 0, action: "start", to: 1 },
+    { from: 1, action: "job.accepted", to: 2 },
+    { from: 2, action: "job.retry", to: 1 },
+  ],
+};
+const progressVerification = (await client.callTool({
+  name: "verify_lts",
+  arguments: {
+    machines: [retryingWorker],
+    progressProperties: [
+      {
+        name: "accepted-work-completes",
+        type: "conditional-progress",
+        conditionActions: ["job.accepted"],
+        progressActions: ["job.completed"],
+      },
+    ],
+  },
+})) as CallToolResult;
+assert.equal(progressVerification.isError, undefined);
+assert.equal(progressVerification.structuredContent?.passed, false);
+assert.equal(
+  progressVerification.structuredContent?.verdict,
+  "progress-violation",
+);
+const progressFinding = progressVerification.structuredContent?.finding as
+  | { trace?: unknown[]; terminalStates?: unknown[]; fairness?: string }
+  | undefined;
+assert.deepEqual(
+  [...((progressFinding?.terminalStates ?? []) as number[])].sort(),
+  [1, 2],
+);
+assert.equal(progressFinding?.fairness, "fair-choice");
+
+const progressRendering = (await client.callTool({
+  name: "render_lts",
+  arguments: {
+    machines: [retryingWorker],
+    trace: progressFinding?.trace,
+    highlightStates: progressFinding?.terminalStates,
+  },
+})) as CallToolResult;
+assert.equal(progressRendering.isError, undefined);
+assert.equal(progressRendering.structuredContent?.highlightedStates, 2);
+
 function cyclicCounter(name: string, action: string) {
   return {
     name,
@@ -113,4 +173,6 @@ assert.match(
 await client.close();
 await server.close();
 
-console.log("AnviLTS MCP smoke test passed: 4 tools, counterexample, SVG, and state limit.");
+console.log(
+  "AnviLTS MCP smoke test passed: 4 tools, safety and progress counterexamples, recurrent-state SVG, and state limit.",
+);

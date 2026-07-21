@@ -59,11 +59,42 @@ A property is a passive deterministic non-terminating LTS:
 - The property must be deterministic for each `(state, action)` pair, non-terminating, and must not observe `tau`.
 - Property actions must exist in the system alphabet.
 
+## Progress properties
+
+Progress is checked over infinite executions using LTSA's fair-choice assumption. Under fair choice, if a choice among transitions is encountered infinitely often, every transition in that choice occurs infinitely often. State this assumption when proposing the abstraction.
+
+A basic progress property requires at least one listed action to occur infinitely often:
+
+```json
+{
+  "name": "jobs-continue-completing",
+  "type": "progress",
+  "actions": ["job.completed", "job.rejected"]
+}
+```
+
+A conditional progress property requires progress only when a condition action also occurs infinitely often:
+
+```json
+{
+  "name": "accepted-jobs-make-progress",
+  "type": "conditional-progress",
+  "conditionActions": ["job.accepted"],
+  "progressActions": ["job.completed", "job.rejected"]
+}
+```
+
+- Every action must be observable, unique within its set, and present in the system alphabet. Do not use `tau` in progress properties.
+- Basic progress fails when a reachable cyclic terminal component contains none of the listed actions.
+- Conditional progress fails when a condition action recurs in such a component but no progress action does.
+- Conditional progress does not express the per-request response property “every accepted job eventually completes.”
+- A progress violation returns a shortest `prefixTrace` into the recurrent region, its `terminalStates`, its `recurringActions`, and the `missingProgressActions`.
+
 ## Tool sequence
 
-1. `validate_model`: schema and semantic validation, property completion, shared-action summary.
+1. `validate_model`: schema and semantic validation, safety-property completion, progress-action validation, shared-action summary.
 2. `compose_lts`: reachable composition and optional full composite JSON.
-3. `verify_lts`: deadlock/ERROR/property exploration and shortest counterexample.
-4. `render_lts`: SVG graph. Pass the returned `trace`; also pass `property` for property-violation traces so the monitor product is rendered.
+3. `verify_lts`: deadlock/ERROR/safety/progress exploration and shortest diagnostic prefix.
+4. `render_lts`: SVG graph. Pass the returned `trace`; also pass `property` for safety-property traces. For progress violations, pass `prefixTrace` as `trace` and `terminalStates` as `highlightStates`.
 
 The default MCP state limit is 100,000 reachable states and may be set from 100 to 500,000 per call.

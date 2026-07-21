@@ -8,6 +8,12 @@ import {
   type ReachabilityResult,
 } from "./reachability.ts";
 import {
+  analyzeProgress,
+  parseProgressProperty,
+  type ProgressAnalysis,
+  type ProgressProperty,
+} from "./progress.ts";
+import {
   parseStateMachineJson,
   type State,
   type StateMachine,
@@ -28,6 +34,16 @@ async function loadStateMachine(path: string): Promise<StateMachine> {
   try {
     const contents = await readFile(path, "utf8");
     return parseStateMachineJson(contents);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`${path}: ${message}`);
+  }
+}
+
+async function loadProgressProperty(path: string): Promise<ProgressProperty> {
+  try {
+    const contents = await readFile(path, "utf8");
+    return parseProgressProperty(JSON.parse(contents));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`${path}: ${message}`);
@@ -96,6 +112,37 @@ function printPropertyAnalysis(
   }
 }
 
+function printProgressAnalysis(analysis: ProgressAnalysis): void {
+  console.log("Progress analysis uses LTSA fair-choice semantics.");
+
+  for (const result of analysis.results) {
+    if (result.satisfied) {
+      console.log(`Progress ${JSON.stringify(result.property.name)} satisfied.`);
+      continue;
+    }
+
+    const violation = result.violation!;
+    console.log(`Progress ${JSON.stringify(result.property.name)} violated.`);
+    if (violation.prefixTrace.length === 0) {
+      console.log("  The initial state is in the violating terminal component.");
+    } else {
+      console.log("  Shortest trace to the violating terminal component:");
+      for (const transition of violation.prefixTrace) {
+        console.log(
+          `    ${formatState(transition.from)} --${transition.action}--> ` +
+            formatState(transition.to),
+        );
+      }
+    }
+    console.log(
+      `  Recurring actions: ${JSON.stringify(violation.recurringActions)}`,
+    );
+    console.log(
+      `  Missing progress actions: ${JSON.stringify(violation.missingProgressActions)}`,
+    );
+  }
+}
+
 const program = new Command();
 
 program
@@ -112,6 +159,11 @@ program
     parseProcessNames,
   )
   .option("-p, --property <path>", "path to a safety-property JSON file")
+  .option(
+    "--progress <path>",
+    "path to an LTSA-style progress-property JSON file (repeatable)",
+    collectPath,
+  )
   .option("-d, --check-deadlock", "check reachable states for deadlocks")
   .showHelpAfterError()
   .parse();
@@ -120,12 +172,16 @@ const options = program.opts<{
   stateMachine: string[];
   compose?: string[];
   property?: string;
+  progress?: string[];
   checkDeadlock?: boolean;
 }>();
 
 try {
   const loadedMachines = await Promise.all(
     options.stateMachine.map(loadStateMachine),
+  );
+  const progressProperties = await Promise.all(
+    (options.progress ?? []).map(loadProgressProperty),
   );
 
   let stateMachine: StateMachine;
@@ -157,6 +213,7 @@ try {
     successMessage = "Composite state machine created successfully:";
   }
 
+  const systemMachine = stateMachine;
   let propertyName: string | undefined;
 
   if (options.property !== undefined) {
@@ -180,6 +237,17 @@ try {
     if (options.checkDeadlock === true) {
       printDeadlockAnalysis(analysis);
     }
+  }
+
+  if (progressProperties.length > 0) {
+    const systemAnalysis = detectDeadlocks(systemMachine);
+    const progressAnalysis = analyzeProgress(
+      systemMachine,
+      systemAnalysis,
+      progressProperties,
+    );
+    console.log();
+    printProgressAnalysis(progressAnalysis);
   }
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);

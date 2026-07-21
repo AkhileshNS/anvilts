@@ -33,6 +33,31 @@ const machinesSchema = z
   .min(1)
   .describe("Component LTS definitions approved by the user.");
 
+const actionSetSchema = z
+  .array(z.string().min(1))
+  .min(1)
+  .describe('Observable action names; the internal action "tau" is not allowed.');
+
+const progressPropertySchema = z.discriminatedUnion("type", [
+  z.object({
+    name: z.string().min(1),
+    type: z.literal("progress"),
+    actions: actionSetSchema.describe(
+      "At least one of these actions must occur infinitely often.",
+    ),
+  }),
+  z.object({
+    name: z.string().min(1),
+    type: z.literal("conditional-progress"),
+    conditionActions: actionSetSchema.describe(
+      "If any of these actions occurs infinitely often, progress is required.",
+    ),
+    progressActions: actionSetSchema.describe(
+      "At least one of these actions must then occur infinitely often.",
+    ),
+  }),
+]);
+
 const maxStatesSchema = z
   .number()
   .int()
@@ -53,7 +78,7 @@ export function createAnviLtsServer(): McpServer {
     { name: "anvilts", version: "0.1.0" },
     {
       instructions:
-        "Deterministic labelled-transition-system validation, composition, safety verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model.",
+        "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model and its assumptions.",
     },
   );
 
@@ -62,10 +87,11 @@ export function createAnviLtsServer(): McpServer {
     {
       title: "Validate LTS model",
       description:
-        "Validate component LTS JSON and an optional passive safety-property monitor before composition. Use after the user confirms the proposed components, actions, assumptions, and verification question.",
+        "Validate component LTS JSON, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use after the user confirms the proposed components, actions, fairness assumptions, and verification question.",
       inputSchema: {
         machines: machinesSchema,
         property: machineSchema.optional(),
+        progressProperties: z.array(progressPropertySchema).optional(),
       },
       annotations: readOnlyAnnotations,
     },
@@ -96,10 +122,11 @@ export function createAnviLtsServer(): McpServer {
     {
       title: "Verify concurrent model",
       description:
-        "Exhaustively explore the reachable model, detecting deadlocks, reserved ERROR states, and optional safety-monitor violations. Returns a shortest counterexample trace. This proves the approved finite abstraction, not source-code equivalence.",
+        "Exhaustively explore the reachable model, detecting deadlocks, reserved ERROR states, optional safety-monitor violations, and LTSA-style progress violations under fair-choice semantics. Returns shortest finite prefixes to failures or violating terminal components. This proves the approved finite abstraction, not source-code equivalence.",
       inputSchema: {
         machines: machinesSchema,
         property: machineSchema.optional(),
+        progressProperties: z.array(progressPropertySchema).optional(),
         includeSystem: z
           .boolean()
           .optional()
@@ -126,6 +153,12 @@ export function createAnviLtsServer(): McpServer {
           .array(transitionSchema)
           .optional()
           .describe("Optional counterexample trace returned by verify_lts."),
+        highlightStates: z
+          .array(stateSchema)
+          .optional()
+          .describe(
+            "Optional recurrent terminal-component states returned by a progress violation.",
+          ),
         orientation: z.enum(["horizontal", "vertical"]).optional(),
         maxStates: maxStatesSchema,
       },

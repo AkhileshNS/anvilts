@@ -13,6 +13,7 @@ export type GraphOrientation = "horizontal" | "vertical";
 export interface MachineDotOptions {
   background?: "dark" | "transparent";
   current?: State;
+  highlightStates?: State[];
   orientation?: GraphOrientation;
   trace?: Transition[];
 }
@@ -62,6 +63,9 @@ export function buildMachineDot(
     ]),
   );
   const traceTransitions = new Set((options.trace ?? []).map(transitionKey));
+  const highlightedStates = new Set(
+    (options.highlightStates ?? []).map(stateKey),
+  );
   const states = collectStates(machine);
   const nodeIdByState = new Map(
     states.map((state, index) => [stateKey(state), `state_${index}`]),
@@ -71,45 +75,65 @@ export function buildMachineDot(
     const isEnd = machine.end !== NO_END && statesEqual(state, machine.end);
     const isError = statesEqual(state, ERROR_STATE);
     const isInTrace = traceStates.has(stateKey(state));
+    const isHighlighted = highlightedStates.has(stateKey(state));
     const color = isError
       ? "#ff8585"
       : isCurrent
         ? "#f4f5f4"
         : isInTrace
           ? "#f0b35a"
-          : "#626262";
+          : isHighlighted
+            ? "#a78bfa"
+            : "#626262";
     const fill = isError
       ? "#321b1b"
       : isCurrent
         ? "#f4f5f4"
         : isInTrace
           ? "#2a2116"
-          : "#151515";
+          : isHighlighted
+            ? "#211a36"
+            : "#151515";
     const font = isCurrent ? "#101010" : isError ? "#ffb8b8" : "#dedede";
     const attributes = [
       `id="state-${index}"`,
       `label="${escapeDot(displayState(state))}"`,
       `shape="${isError ? "diamond" : isEnd ? "doublecircle" : "circle"}"`,
-      `class="state-node${isCurrent ? " current-state" : ""}${isInTrace ? " trace-state" : ""}"`,
+      `class="state-node${isCurrent ? " current-state" : ""}${isInTrace ? " trace-state" : ""}${isHighlighted ? " highlighted-state" : ""}"`,
       `color="${color}"`,
       `fillcolor="${fill}"`,
       `fontcolor="${font}"`,
-      `penwidth="${isCurrent || isInTrace ? "2.4" : "1.3"}"`,
+      `penwidth="${isCurrent || isInTrace || isHighlighted ? "2.4" : "1.3"}"`,
     ];
     return `${nodeIdByState.get(stateKey(state))} [${attributes.join(", ")}];`;
   });
   const edges = machine.transitions.map((transition, index) => {
     const enabled = statesEqual(transition.from, current);
     const isInTrace = traceTransitions.has(transitionKey(transition));
-    const color = isInTrace ? "#f0b35a" : enabled ? "#f4f5f4" : "#4a4a4a";
-    const font = isInTrace ? "#ffd18d" : enabled ? "#f4f5f4" : "#888888";
+    const isHighlighted =
+      highlightedStates.has(stateKey(transition.from)) &&
+      highlightedStates.has(stateKey(transition.to));
+    const color = isInTrace
+      ? "#f0b35a"
+      : enabled
+        ? "#f4f5f4"
+        : isHighlighted
+          ? "#a78bfa"
+          : "#4a4a4a";
+    const font = isInTrace
+      ? "#ffd18d"
+      : enabled
+        ? "#f4f5f4"
+        : isHighlighted
+          ? "#c4b5fd"
+          : "#888888";
     const attributes = [
       `id="transition-${index}"`,
       `label="${escapeDot(transition.action)}"`,
-      `class="transition-edge${enabled ? " enabled-transition" : ""}${isInTrace ? " trace-transition" : ""}"`,
+      `class="transition-edge${enabled ? " enabled-transition" : ""}${isInTrace ? " trace-transition" : ""}${isHighlighted ? " highlighted-transition" : ""}"`,
       `color="${color}"`,
       `fontcolor="${font}"`,
-      `penwidth="${isInTrace || enabled ? "2.4" : "1.1"}"`,
+      `penwidth="${isInTrace || enabled || isHighlighted ? "2.4" : "1.1"}"`,
     ];
 
     return `${nodeIdByState.get(stateKey(transition.from))} -> ${nodeIdByState.get(
