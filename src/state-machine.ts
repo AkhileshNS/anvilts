@@ -146,8 +146,8 @@ export function parseStateMachine(value: unknown): StateMachine {
 
 /**
  * Core entry point for interfaces that receive a JSON representation.
- * A CLI can supply file contents; a web frontend can supply text from an
- * upload, editor, or API response.
+ * A CLI can supply file contents; an MCP or API caller can supply serialized
+ * model data.
  */
 export function parseStateMachineJson(contents: string): StateMachine {
   let value: unknown;

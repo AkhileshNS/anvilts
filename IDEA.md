@@ -2,13 +2,13 @@
 
 ## Current Product Shape
 
-AnviLTS is delivered as a Codex plugin with a local MCP server rather than as a hosted chatbot. Codex already has the repository context and conversational interface needed for model extraction, while the plugin contributes the domain workflow and deterministic verification tools. This removes the hosted LLM backend, BYOK flow, and source-upload surface from the MVP.
+AnviLTS is delivered as a portable local MCP server plus a Codex plugin rather than as a hosted chatbot. MCP-compatible agents can call the verification engine directly. The Codex plugin adds repository context, the domain modeling workflow, and human approval without a hosted LLM backend, BYOK flow, or source-upload surface.
 
-The existing web prototype remains useful as an engine playground and visual design reference. The primary hackathon flow is now: inspect code in Codex, confirm the abstraction, call the local LTS engine, and return a reproducible counterexample plus SVG graph.
+The primary hackathon flow is: inspect code in an agent, confirm the abstraction, call the local LTS engine, and return a reproducible counterexample plus an optional SVG graph.
 
 ## Idea
 
-AnviLTS is a visual, conversational formal-verification tool for concurrent
+AnviLTS is a conversational formal-verification tool for concurrent
 systems. It combines an LLM with a deterministic labelled-transition-system
 (LTS) analysis engine so that engineers can model and check concurrent designs
 without first learning a formal specification language such as FSP.
@@ -40,8 +40,8 @@ explaining formal results. It is not a trustworthy verification engine.
 AnviLTS therefore assigns each part of the system a clear responsibility:
 
 - The user supplies domain knowledge and approves the model and properties.
-- The LLM acts as a whiteboarding partner. It asks clarifying questions,
-  constructs and edits the model, suggests properties, and explains results.
+- The LLM acts as a modeling partner. It inspects relevant code, asks clarifying
+  questions, constructs the model, suggests properties, and explains results.
 - The LTS engine is the source of truth for composition, state exploration,
   property checking, and counterexample generation.
 
@@ -51,29 +51,29 @@ deterministic engine output.
 
 ## Intended Workflow
 
-1. **Describe** — The user explains the concurrent system in natural language.
-2. **Clarify** — The LLM identifies missing or ambiguous behavior and asks the
-   user targeted questions.
+1. **Inspect** — The agent reads the relevant implementation and the user
+   explains the behavior or failure they want to check.
+2. **Clarify** — The agent identifies missing or ambiguous behavior and asks
+   targeted questions.
 3. **Model** — The LLM constructs individual state machines for the system's
    components.
-4. **Review** — AnviLTS renders an editable visual model. The user checks that
-   the components, states, transitions, actions, and assumptions are accurate.
+4. **Review** — The agent exposes the component states, transitions, shared
+   actions, bounds, and assumptions for explicit user approval.
 5. **Specify** — The LLM asks what the user wants to verify and helps express
    those requirements as precise properties.
 6. **Compose** — The engine composes the component state machines into the
    reachable behavior of the system.
 7. **Verify** — The engine checks the selected properties.
 8. **Explain** — AnviLTS presents a successful result or maps a counterexample
-   trace back onto the visual model in language the user can understand.
+   trace back onto the implementation in language the user can understand.
 9. **Refine** — The user and LLM adjust the design or property and run the check
    again.
 
 ## Semantic Model and Visualization
 
-The visual model is not merely a picture that is later reinterpreted by the
-LLM. Every meaningful visual element must be backed by semantic model data. The
-same semantic objects that are rendered on the canvas must be consumed by the
-verification engine.
+Any visualization is derived from the semantic state-machine data consumed by
+the verification engine. A graph is an inspectable view of the model, never a
+separate picture that must be reinterpreted by the LLM.
 
 This prevents a translation gap in which a user approves one design visually
 but the engine verifies a different interpretation.
@@ -94,15 +94,13 @@ A component state machine will initially resemble:
 }
 ```
 
-The final schema will be developed alongside the engine. It must remain
-inspectable, editable, serializable, and validated at the boundary between the
-LLM, visualization, and engine. A visual state-machine tool such as XState may
-be used later, provided it can preserve the engine's semantics.
+The schema must remain inspectable, editable, serializable, and validated at
+the boundary between the agent, optional visualization, and engine.
 
 ## Engine Direction
 
-The engine will be implemented in TypeScript so that the same core can run in a
-web application and in local development environments.
+The engine is implemented in TypeScript so the same core can serve the CLI,
+the local MCP server, parity tests, and future integrations.
 
 It will reconstruct the essential LTSA analysis pipeline rather than invoke the
 FSP compiler:
@@ -150,15 +148,15 @@ The first useful version should:
 - Demonstrate a broken concurrent design, explain its failure, apply a change,
   and verify the revised model.
 
-The conversational modeling UI and rich visual editing experience will be built
-on top of the verified engine rather than used as a substitute for it.
+The MCP workflow and optional visual clients remain presentation layers over
+the verified engine rather than substitutes for it.
 
 ## Differentiation
 
 AnviLTS is not a chatbot that writes FSP and reports success. Its differentiator
 is an evidence-first workflow in which:
 
-- Natural conversation produces an executable visual model.
+- Natural conversation and repository inspection produce an executable model.
 - The user verifies the model before verification begins.
 - A deterministic engine checks the actual model shown to the user.
 - Counterexamples are explained and replayed visually.
@@ -181,5 +179,6 @@ is an evidence-first workflow in which:
 - Error-state and property-automaton representation.
 - Search strategy and counterexample minimization.
 - State-space limits and abstraction support.
-- Persistence and versioning of semantic visual models.
-- The boundary between deterministic application logic and LLM tool calls.
+- Portable packaging and discovery across MCP clients.
+- Interactive MCP UI support without slowing verification-only calls.
+- The boundary between deterministic engine logic and agent tool calls.

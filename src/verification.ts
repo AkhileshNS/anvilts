@@ -79,7 +79,7 @@ function findingFromPropertyViolation(
 }
 
 /**
- * Shared verification entry point for the CLI, frontend, and future API layer.
+ * Shared verification entry point for the CLI, MCP server, and future API layer.
  * It checks the composed system for deadlocks and reserved ERROR states, then
  * independently checks an optional passive safety-property monitor.
  */

@@ -1,65 +1,101 @@
 # AnviLTS
 
-AnviLTS turns Codex into a repository-aware formal-verification partner for concurrent systems. Codex inspects the implementation, works with the user to produce an approved finite abstraction, and delegates the proof to a deterministic labelled-transition-system engine.
+AnviLTS is a repository-aware formal-verification tool for concurrent systems. An AI coding agent inspects an implementation, works with the user to define a finite labelled transition system, and delegates the actual proof to a deterministic model-checking engine.
 
-No FSP authoring, hosted backend, or user-supplied API key is required. The bundled MCP server makes no network calls.
+No FSP authoring, hosted backend, or API key is required. The bundled MCP server makes no network calls.
 
 ```mermaid
 flowchart LR
-    A["Repository + verification question"] --> B["Codex inspects and proposes an abstraction"]
-    B --> C["User confirms components, actions, bounds, and property"]
-    C --> D["AnviLTS MCP validates and composes the LTS"]
+    A["Repository + verification question"] --> B["Agent inspects concurrent behavior"]
+    B --> C["User confirms the finite abstraction"]
+    C --> D["AnviLTS composes the component LTSes"]
     D --> E["Exhaustive deadlock and safety check"]
-    E --> F["Shortest trace + SVG visualization"]
+    E --> F["Shortest trace + optional SVG graph"]
 ```
 
-## What the plugin contains
+## Portable MCP server
 
-- `verify-concurrent-system`: a Codex skill for repository inspection, suitability triage, ambiguity resolution, human model approval, and precise result language.
-- `validate_model`: validates component LTS definitions and optional safety monitors.
-- `compose_lts`: constructs the reachable parallel composition with LTSA-compatible synchronization.
-- `verify_lts`: detects deadlocks, reserved ERROR states, and safety-property violations, returning a shortest counterexample.
-- `render_lts`: returns a dark SVG state graph and can highlight the counterexample trace.
+The verification server is not tied to Codex. It is a standard local MCP server using the `stdio` transport, so any MCP client that can launch a Node.js subprocess can use its four tools:
 
-The MCP server is bundled at `plugins/anvilts/mcp/server.mjs`, so plugin users need Node.js but do not need to install this repository's npm dependencies.
+- `validate_model`: validate component LTS definitions and optional safety monitors.
+- `compose_lts`: construct the reachable parallel composition.
+- `verify_lts`: detect deadlocks, reserved ERROR states, and safety-property violations.
+- `render_lts`: render a dark SVG state graph with an optional highlighted trace.
 
-## Install in Codex
+The Codex plugin adds the repository-inspection and human-approval workflow. Other clients still receive the deterministic tools, but their agent needs equivalent modeling instructions. SVG presentation also depends on how that client displays MCP resources.
 
-From the repository root:
+After cloning or building the repository, the portable server entry point is:
+
+```text
+plugins/anvilts/mcp/server.mjs
+```
+
+For example, a VS Code workspace can add `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "anvilts": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/plugins/anvilts/mcp/server.mjs"],
+      "cwd": "${workspaceFolder}/plugins/anvilts"
+    }
+  }
+}
+```
+
+Use the same command and absolute bundle path in another MCP client according to that client's configuration format. Node.js 22.18 or newer is required.
+
+## Install the Codex plugin
+
+The repository includes a local plugin marketplace at `.agents/plugins/marketplace.json`. In the ChatGPT desktop app, restart after cloning, open **Plugins**, choose **AnviLTS Development**, install **AnviLTS**, and start a new task.
+
+Codex CLI users can instead run:
 
 ```sh
 codex plugin marketplace add .
 codex plugin add anvilts@anvilts-local
 ```
 
-Start a new Codex task after installation so the skill and MCP tools are loaded.
+## Judge demos
 
-## Two-minute judge demo
+The examples are intentionally ordinary service code. Their names and comments do not disclose the concurrency defect.
 
-Open this repository in Codex and ask:
+### Document service
 
-> Use $verify-concurrent-system to inspect `examples/warehouse-deadlock/warehouse.py`. Can `process_order` and `issue_refund` deadlock when they run concurrently?
+> Use $verify-concurrent-system to inspect `examples/document-service`. Document deletion occasionally stops responding while the audit uploader is active. Determine whether concurrency could explain it.
 
-Codex should inspect the lock ordering, propose a finite model and ask for confirmation. After approval, it validates and verifies the model, returns the shortest circular-wait trace, and renders that trace as an SVG. Repeat against `warehouse_fixed.py` to show how a consistent acquisition order removes the deadlock from the model.
+This exercises coordination between a document store and a buffered audit subsystem.
 
-The important boundary is explicit: AnviLTS proves the approved model under its stated assumptions. It does not claim that model extraction establishes source-code equivalence.
+### Report service
+
+> Use $verify-concurrent-system to inspect `examples/report-service`. Month-end batches reliably stop making progress when several accounts are processed together. Find the concurrency failure and verify your explanation.
+
+This exercises a bounded executor and nested background work rather than explicit lock ordering.
+
+### Session service
+
+> Use $verify-concurrent-system to inspect `examples/session-service`. We see rare authentication stalls when key rotation overlaps heavy session refresh traffic. Determine whether the implementation permits a permanent wait.
+
+This exercises asynchronous coordination across the session registry and key manager.
+
+For each demo, Codex should inspect the code, propose a finite abstraction, and ask for confirmation. Once approved, AnviLTS validates the model and returns a shortest counterexample if the failure is reachable. The user can then ask Codex to fix the implementation and verify the revised model.
+
+AnviLTS proves the approved model under its stated assumptions. It does not claim that model extraction establishes source-code equivalence.
 
 ## Development
 
-Requires Node.js 22.18 or newer.
-
 ```sh
 npm install
-npm run typecheck:mcp
+npm run typecheck
 npm run test:mcp
-npm run build:mcp
+npm run build
 npm run test:plugin
 npm run parity
 ```
 
 `npm run parity` compares the engine against 52 LTSA textbook-derived fixtures. The current suite has full verdict and graph parity: 52/52, with zero graph differences.
-
-The existing web prototype remains available with `npm run dev`; its examples and graph playground exercise the same core TypeScript engine.
 
 ## Verification semantics
 

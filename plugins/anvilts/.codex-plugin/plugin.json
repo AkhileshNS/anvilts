@@ -1,6 +1,6 @@
 {
   "name": "anvilts",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.20260721052140",
   "description": "Repository-aware formal verification for concurrent systems using labelled transition systems.",
   "author": {
     "name": "Akhilesh NS"

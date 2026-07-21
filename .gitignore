@@ -2,3 +2,5 @@ node_modules/
 dist/
 parity/.jarout/
 ltsp-extension/
+__pycache__/
+*.py[cod]
