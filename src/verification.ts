@@ -35,6 +35,10 @@ export interface VerificationReport {
   passed: boolean;
 }
 
+export interface VerificationOptions {
+  maxStates?: number;
+}
+
 function findingFromDeadlock(deadlock: Deadlock): VerificationFinding {
   return {
     kind: "deadlock",
@@ -82,18 +86,21 @@ function findingFromPropertyViolation(
 export function verifyStateMachines(
   machines: StateMachine[],
   propertyDefinition?: StateMachine,
+  options: VerificationOptions = {},
 ): VerificationReport {
   if (machines.length === 0) {
     throw new Error("Verification requires at least one state machine.");
   }
 
   const system =
-    machines.length === 1 ? machines[0]! : composeStateMachines(machines);
+    machines.length === 1
+      ? machines[0]!
+      : composeStateMachines(machines, options);
   const systemReachability = detectDeadlocks(system);
   let property: PropertyVerification | undefined;
 
   if (propertyDefinition) {
-    const monitoredSystem = monitorProperty(system, propertyDefinition);
+    const monitoredSystem = monitorProperty(system, propertyDefinition, options);
     property = {
       definition: propertyDefinition,
       monitoredSystem,

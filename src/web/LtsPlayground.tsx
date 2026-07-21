@@ -14,6 +14,11 @@ import { instance, type Viz } from "@viz-js/viz";
 import type { DemoProject } from "../examples/demo-projects";
 import { createSystemSketch } from "../sketch/system-sketch";
 import {
+  buildMachineDot,
+  displayState,
+  type GraphOrientation as Orientation,
+} from "../render";
+import {
   ERROR_STATE,
   NO_END,
   stateKey,
@@ -22,8 +27,6 @@ import {
   type StateMachine,
   type Transition,
 } from "../state-machine";
-
-type Orientation = "horizontal" | "vertical";
 
 interface TraceStep {
   transitionIndex: number;
@@ -67,34 +70,6 @@ let vizPromise: Promise<Viz> | undefined;
 function getViz(): Promise<Viz> {
   vizPromise ??= instance();
   return vizPromise;
-}
-
-function displayState(state: State): string {
-  if (Array.isArray(state)) {
-    return `(${state.map(displayState).join(", ")})`;
-  }
-
-  return String(state);
-}
-
-function escapeDot(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
-function collectStates(machine: StateMachine): State[] {
-  const states = new Map<string, State>();
-  const add = (state: State) => states.set(stateKey(state), state);
-
-  add(machine.initial);
-  if (machine.end !== NO_END) {
-    add(machine.end);
-  }
-  for (const transition of machine.transitions) {
-    add(transition.from);
-    add(transition.to);
-  }
-
-  return [...states.values()];
 }
 
 function readViewBox(svg: SVGSVGElement): ViewBox | undefined {
@@ -151,58 +126,6 @@ function writeViewBox(svg: SVGSVGElement, view: ViewBox) {
     "viewBox",
     `${view.x} ${view.y} ${view.width} ${view.height}`,
   );
-}
-
-export function buildMachineDot(
-  machine: StateMachine,
-  current: State,
-  orientation: Orientation,
-): string {
-  const states = collectStates(machine);
-  const nodeIdByState = new Map(
-    states.map((state, index) => [stateKey(state), `state_${index}`]),
-  );
-  const nodes = states.map((state, index) => {
-    const isCurrent = statesEqual(state, current);
-    const isEnd = machine.end !== NO_END && statesEqual(state, machine.end);
-    const isError = state === ERROR_STATE;
-    const attributes = [
-      `id="state-${index}"`,
-      `label="${escapeDot(displayState(state))}"`,
-      `shape="${isError ? "diamond" : isEnd ? "doublecircle" : "circle"}"`,
-      `class="state-node${isCurrent ? " current-state" : ""}"`,
-      `color="${isError ? "#d16d6d" : isCurrent ? "#f4f5f4" : "#555555"}"`,
-      `fillcolor="${isError ? "#321b1b" : isCurrent ? "#f4f5f4" : "#151515"}"`,
-      `fontcolor="${isCurrent ? "#101010" : isError ? "#ffb8b8" : "#d8d8d8"}"`,
-      `penwidth="${isCurrent ? "2.4" : "1.3"}"`,
-    ];
-    return `${nodeIdByState.get(stateKey(state))} [${attributes.join(", ")}];`;
-  });
-  const edges = machine.transitions.map((transition, index) => {
-    const enabled = statesEqual(transition.from, current);
-    const attributes = [
-      `id="transition-${index}"`,
-      `class="transition-edge${enabled ? " enabled-transition" : ""}"`,
-      `label="${escapeDot(transition.action)}"`,
-      `color="${enabled ? "#f4f5f4" : "#4a4a4a"}"`,
-      `fontcolor="${enabled ? "#f4f5f4" : "#777777"}"`,
-      `penwidth="${enabled ? "2.4" : "1.1"}"`,
-    ];
-
-    return `${nodeIdByState.get(stateKey(transition.from))} -> ${nodeIdByState.get(
-      stateKey(transition.to),
-    )} [${attributes.join(", ")}];`;
-  });
-
-  return `digraph LTS {
-    graph [bgcolor="transparent", rankdir="${orientation === "horizontal" ? "LR" : "TB"}", pad="0.3", nodesep="0.65", ranksep="0.8", splines="spline"];
-    node [style="filled", fontname="Arial", fontsize="11", fixedsize="false", margin="0.12,0.08"];
-    edge [fontname="Arial", fontsize="9", arrowsize="0.72"];
-    __start [shape="point", width="0.08", color="#8a8a8a", fillcolor="#8a8a8a"];
-    __start -> ${nodeIdByState.get(stateKey(machine.initial))} [color="#8a8a8a", arrowsize="0.65"];
-    ${nodes.join("\n")}
-    ${edges.join("\n")}
-  }`;
 }
 
 function GraphvizMachine({
@@ -291,7 +214,7 @@ function GraphvizMachine({
         }
 
         const svg = viz.renderSVGElement(
-          buildMachineDot(machine, current, orientation),
+          buildMachineDot(machine, { current, orientation }),
           { engine: "dot" },
         );
         activeSvg = svg;

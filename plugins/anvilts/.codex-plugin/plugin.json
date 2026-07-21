@@ -1,0 +1,28 @@
+{
+  "name": "anvilts",
+  "version": "0.1.0",
+  "description": "Repository-aware formal verification for concurrent systems using labelled transition systems.",
+  "author": {
+    "name": "Akhilesh NS"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AnviLTS",
+    "shortDescription": "Model-check concurrent code with LTS.",
+    "longDescription": "Inspect concurrent code with Codex, confirm a finite abstraction with the user, then deterministically check deadlocks and safety properties with shortest counterexamples and SVG state graphs.",
+    "developerName": "Akhilesh NS",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Concurrent code analysis",
+      "LTS composition",
+      "Deadlock detection",
+      "Safety-property verification",
+      "Counterexample visualization"
+    ],
+    "defaultPrompt": [
+      "Inspect this repository and verify a concurrency risk with AnviLTS.",
+      "Model this concurrent protocol and check it for deadlocks."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

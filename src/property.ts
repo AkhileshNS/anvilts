@@ -94,6 +94,7 @@ export function completeProperty(property: StateMachine): StateMachine {
 export function monitorProperty(
   system: StateMachine,
   propertyDefinition: StateMachine,
+  options: { maxStates?: number } = {},
 ): StateMachine<MonitoredState> {
   const property = completeProperty(propertyDefinition);
   const relevantActions = new Set(
@@ -187,6 +188,7 @@ export function monitorProperty(
     eligibleTransitions,
     isEnd: (state) => state === END_STATE,
     isError: (state) => state === ERROR_STATE,
+    maxStates: options.maxStates,
   });
 
   return {

@@ -16,6 +16,10 @@ export type CompositeMachineState =
   | typeof END_STATE
   | typeof ERROR_STATE;
 
+export interface CompositionOptions {
+  maxStates?: number;
+}
+
 function enabledTransitions(
   machine: StateMachine,
   state: State,
@@ -33,6 +37,7 @@ function enabledTransitions(
  */
 export function composeStateMachines(
   machines: StateMachine[],
+  options: CompositionOptions = {},
 ): StateMachine<CompositeMachineState> {
   if (machines.length < 2) {
     throw new Error("Composition requires at least two state machines.");
@@ -184,6 +189,7 @@ export function composeStateMachines(
     eligibleTransitions,
     isEnd: (state) => state === END_STATE,
     isError: (state) => state === ERROR_STATE,
+    maxStates: options.maxStates,
   });
 
   return {

@@ -13,6 +13,25 @@ export interface ReachabilityOptions<StateType extends State> {
   eligibleTransitions: (state: StateType) => Transition<StateType>[];
   isEnd: (state: StateType) => boolean;
   isError?: (state: StateType) => boolean;
+  maxStates?: number;
+}
+
+export class StateSpaceLimitError extends Error {
+  readonly limit: number;
+  readonly discoveredStates: number;
+
+  constructor(
+    limit: number,
+    discoveredStates: number,
+  ) {
+    super(
+      `Reachable-state limit of ${limit.toLocaleString()} exceeded. ` +
+        "Reduce the model, strengthen the abstraction, or raise the limit.",
+    );
+    this.name = "StateSpaceLimitError";
+    this.limit = limit;
+    this.discoveredStates = discoveredStates;
+  }
 }
 
 export interface Deadlock<StateType extends State = State> {
@@ -95,6 +114,13 @@ export function exploreReachable<StateType extends State>(
       const key = stateKey(transition.to);
 
       if (!visited.has(key)) {
+        if (
+          options.maxStates !== undefined &&
+          visited.size >= options.maxStates
+        ) {
+          throw new StateSpaceLimitError(options.maxStates, visited.size + 1);
+        }
+
         visited.add(key);
         parents.set(key, {
           previous: state,

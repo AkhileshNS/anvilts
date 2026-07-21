@@ -1,5 +1,11 @@
 # AnviLTS
 
+## Current Product Shape
+
+AnviLTS is delivered as a Codex plugin with a local MCP server rather than as a hosted chatbot. Codex already has the repository context and conversational interface needed for model extraction, while the plugin contributes the domain workflow and deterministic verification tools. This removes the hosted LLM backend, BYOK flow, and source-upload surface from the MVP.
+
+The existing web prototype remains useful as an engine playground and visual design reference. The primary hackathon flow is now: inspect code in Codex, confirm the abstraction, call the local LTS engine, and return a reproducible counterexample plus SVG graph.
+
 ## Idea
 
 AnviLTS is a visual, conversational formal-verification tool for concurrent

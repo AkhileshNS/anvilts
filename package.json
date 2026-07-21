@@ -8,8 +8,13 @@
     "start": "node src/cli.ts",
     "parity": "node parity/run-cases.ts",
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vite build && npm run build:mcp",
+    "build:mcp": "esbuild src/mcp/server.ts --bundle --platform=node --format=esm --target=node22 --outfile=plugins/anvilts/mcp/server.mjs",
+    "mcp": "node src/mcp/server.ts",
+    "preview": "vite preview",
+    "test:mcp": "node src/mcp/smoke-test.ts",
+    "test:plugin": "node src/mcp/plugin-smoke-test.ts",
+    "typecheck:mcp": "tsc --noEmit --project tsconfig.mcp.json"
   },
   "engines": {
     "node": ">=22.18"
@@ -17,17 +22,21 @@
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",
     "@excalidraw/mermaid-to-excalidraw": "^2.2.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@viz-js/viz": "^3.28.0",
     "commander": "^15.0.0",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "^7.18.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "esbuild": "^0.28.1",
     "typescript": "^7.0.2",
     "vite": "^8.1.5"
   }

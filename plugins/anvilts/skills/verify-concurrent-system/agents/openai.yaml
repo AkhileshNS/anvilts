@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Concurrent System"
+  short_description: "Model and verify concurrent code with LTS"
+  default_prompt: "Use $verify-concurrent-system to inspect this codebase and verify its concurrency behavior."
