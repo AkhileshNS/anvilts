@@ -4,6 +4,8 @@ import {
   ERROR_STATE,
   NO_END,
   TAU,
+  mergeAbstractions,
+  mergeEvidence,
   stateKey,
   statesEqual,
   type State,
@@ -68,14 +70,36 @@ export function completeProperty(property: StateMachine): StateMachine {
         }
 
         if (matching.length === 0) {
-          transitions.push({ from: ERROR_STATE, action, to: ERROR_STATE });
+          transitions.push({
+            from: ERROR_STATE,
+            action,
+            to: ERROR_STATE,
+            evidence: [
+              {
+                kind: "derived",
+                explanation: `ERROR remains absorbing for action ${JSON.stringify(action)}.`,
+              },
+            ],
+          });
         }
 
         continue;
       }
 
       if (matching.length === 0) {
-        transitions.push({ from: state, action, to: ERROR_STATE });
+        transitions.push({
+          from: state,
+          action,
+          to: ERROR_STATE,
+          evidence: [
+            {
+              kind: "derived",
+              explanation:
+                `Safety property ${JSON.stringify(property.name)} disallows ` +
+                `${JSON.stringify(action)} from state ${stateKey(state)}.`,
+            },
+          ],
+        });
       }
     }
   }
@@ -153,6 +177,7 @@ export function monitorProperty(
     return (systemOutgoing.get(stateKey(systemState)) ?? []).map(
       (systemTransition) => {
         let nextPropertyState = propertyState;
+        let propertyTransition: Transition | undefined;
 
         if (
           systemTransition.action !== TAU &&
@@ -170,13 +195,20 @@ export function monitorProperty(
             );
           }
 
-          nextPropertyState = matching[0]!.to;
+          propertyTransition = matching[0]!;
+          nextPropertyState = propertyTransition.to;
         }
+
+        const evidence = mergeEvidence(
+          systemTransition.evidence,
+          propertyTransition?.evidence,
+        );
 
         return {
           from: state,
           action: systemTransition.action,
           to: normalizeTarget(systemTransition.to, nextPropertyState),
+          ...(evidence === undefined ? {} : { evidence }),
         };
       },
     );
@@ -190,6 +222,7 @@ export function monitorProperty(
     isError: (state) => state === ERROR_STATE,
     maxStates: options.maxStates,
   });
+  const abstraction = mergeAbstractions([system, propertyDefinition]);
 
   return {
     name: `${system.name} monitored by ${property.name}`,
@@ -197,5 +230,6 @@ export function monitorProperty(
     initial,
     end: system.end === NO_END ? NO_END : END_STATE,
     transitions: result.transitions,
+    ...(abstraction === undefined ? {} : { abstraction }),
   };
 }

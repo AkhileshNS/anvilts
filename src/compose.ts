@@ -4,6 +4,8 @@ import {
   ERROR_STATE,
   NO_END,
   TAU,
+  mergeAbstractions,
+  mergeEvidence,
   statesEqual,
   type State,
   type StateMachine,
@@ -129,6 +131,9 @@ export function composeStateMachines(
               from: [...compositeState],
               action: TAU,
               to: normalizeTarget(target),
+              ...(transition.evidence === undefined
+                ? {}
+                : { evidence: transition.evidence }),
             });
           }
         }
@@ -148,7 +153,10 @@ export function composeStateMachines(
         continue;
       }
 
-      let targets: CompositeState[] = [[...compositeState]];
+      let targets: Array<{
+        state: CompositeState;
+        contributors: Transition[];
+      }> = [{ state: [...compositeState], contributors: [] }];
 
       for (
         let participant = 0;
@@ -157,13 +165,16 @@ export function composeStateMachines(
       ) {
         const machineIndex = participatingMachines[participant]!;
         const enabled = enabledByParticipant[participant]!;
-        const nextTargets: CompositeState[] = [];
+        const nextTargets: typeof targets = [];
 
         for (const target of targets) {
           for (const transition of enabled) {
-            const nextTarget = [...target];
+            const nextTarget = [...target.state];
             nextTarget[machineIndex] = transition.to;
-            nextTargets.push(nextTarget);
+            nextTargets.push({
+              state: nextTarget,
+              contributors: [...target.contributors, transition],
+            });
           }
         }
 
@@ -171,10 +182,15 @@ export function composeStateMachines(
       }
 
       for (const target of targets) {
+        const evidence = mergeEvidence(
+          ...target.contributors.map((transition) => transition.evidence),
+        );
+
         eligible.push({
           from: [...compositeState],
           action,
-          to: normalizeTarget(target),
+          to: normalizeTarget(target.state),
+          ...(evidence === undefined ? {} : { evidence }),
         });
       }
     }
@@ -191,6 +207,7 @@ export function composeStateMachines(
     isError: (state) => state === ERROR_STATE,
     maxStates: options.maxStates,
   });
+  const abstraction = mergeAbstractions(machines);
 
   return {
     name: machines.map((machine) => machine.name).join(" || "),
@@ -198,5 +215,6 @@ export function composeStateMachines(
     initial,
     end: canTerminate ? END_STATE : NO_END,
     transitions: result.transitions,
+    ...(abstraction === undefined ? {} : { abstraction }),
   };
 }

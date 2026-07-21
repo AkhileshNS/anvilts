@@ -14,10 +14,36 @@ const stateSchema = z.union([
   z.array(z.unknown()).min(1),
 ]);
 
+const evidenceSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("code"),
+    path: z
+      .string()
+      .min(1)
+      .describe("Repository-relative source path supporting this transition."),
+    startLine: z.number().int().positive(),
+    endLine: z.number().int().positive().optional(),
+    symbol: z.string().min(1).optional(),
+    explanation: z
+      .string()
+      .min(1)
+      .describe("Why this source location justifies the modeled behavior."),
+  }),
+  z.object({
+    kind: z.enum(["user-stated", "assumption", "environment", "derived"]),
+    explanation: z.string().min(1),
+  }),
+]);
+
 const transitionSchema = z.object({
   from: stateSchema,
   action: z.string().min(1),
   to: stateSchema,
+  evidence: z
+    .array(evidenceSchema)
+    .min(1)
+    .optional()
+    .describe("Auditable evidence supporting this abstract transition."),
 });
 
 const machineSchema = z.object({
@@ -26,6 +52,19 @@ const machineSchema = z.object({
   initial: stateSchema,
   end: z.union([z.literal(-1), stateSchema]).optional(),
   transitions: z.array(transitionSchema),
+  abstraction: z
+    .object({
+      sourceRevision: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Commit, tree, or other immutable source revision modeled."),
+      assumptions: z.array(z.string().min(1)).optional(),
+      omissions: z.array(z.string().min(1)).optional(),
+      unresolved: z.array(z.string().min(1)).optional(),
+    })
+    .optional()
+    .describe("Model-wide abstraction decisions that require human review."),
 });
 
 const machinesSchema = z
@@ -78,7 +117,7 @@ export function createAnviLtsServer(): McpServer {
     { name: "anvilts", version: "0.1.0" },
     {
       instructions:
-        "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model and its assumptions.",
+        "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction, retain source evidence on transitions, resolve provenance warnings before verification, and describe results as claims about that model and its assumptions.",
     },
   );
 
@@ -87,7 +126,7 @@ export function createAnviLtsServer(): McpServer {
     {
       title: "Validate LTS model",
       description:
-        "Validate component LTS JSON, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use after the user confirms the proposed components, actions, fairness assumptions, and verification question.",
+        "Validate component LTS JSON, transition provenance, model-wide abstraction decisions, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use its audit warnings during human approval.",
       inputSchema: {
         machines: machinesSchema,
         property: machineSchema.optional(),

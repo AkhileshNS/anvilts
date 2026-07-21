@@ -117,6 +117,99 @@ function summarizeMachine(machine: StateMachine) {
   };
 }
 
+function auditMachine(machine: StateMachine, role: "component" | "property") {
+  const uncitedTransitions = machine.transitions.flatMap((transition, index) =>
+    transition.evidence?.length
+      ? []
+      : [
+          {
+            index,
+            from: transition.from,
+            action: transition.action,
+            to: transition.to,
+          },
+        ],
+  );
+  const codeBackedTransitions = machine.transitions.filter((transition) =>
+    transition.evidence?.some((evidence) => evidence.kind === "code"),
+  ).length;
+  const evidenceByKind = {
+    code: 0,
+    "user-stated": 0,
+    assumption: 0,
+    environment: 0,
+    derived: 0,
+  };
+
+  for (const transition of machine.transitions) {
+    for (const evidence of transition.evidence ?? []) {
+      evidenceByKind[evidence.kind] += 1;
+    }
+  }
+
+  const abstraction = machine.abstraction ?? {
+    assumptions: [],
+    omissions: [],
+    unresolved: [],
+  };
+  const warnings: string[] = [];
+
+  if (uncitedTransitions.length > 0) {
+    warnings.push(
+      `${machine.name}: ${uncitedTransitions.length} of ${machine.transitions.length} ` +
+        "transitions have no provenance evidence.",
+    );
+  }
+
+  if (codeBackedTransitions > 0 && abstraction.sourceRevision === undefined) {
+    warnings.push(
+      `${machine.name}: code evidence is present but abstraction.sourceRevision is missing.`,
+    );
+  }
+
+  if (abstraction.unresolved.length > 0) {
+    warnings.push(
+      `${machine.name}: ${abstraction.unresolved.length} unresolved abstraction ` +
+        `item${abstraction.unresolved.length === 1 ? " remains" : "s remain"}.`,
+    );
+  }
+
+  return {
+    name: machine.name,
+    role,
+    sourceRevision: abstraction.sourceRevision ?? null,
+    totalTransitions: machine.transitions.length,
+    evidencedTransitions:
+      machine.transitions.length - uncitedTransitions.length,
+    codeBackedTransitions,
+    evidenceReferences: evidenceByKind,
+    uncitedTransitions,
+    assumptions: abstraction.assumptions,
+    omissions: abstraction.omissions,
+    unresolved: abstraction.unresolved,
+    warnings,
+  };
+}
+
+function buildApprovalAudit(
+  machines: StateMachine[],
+  property?: StateMachine,
+) {
+  const models = [
+    ...machines.map((machine) => auditMachine(machine, "component")),
+    ...(property ? [auditMachine(property, "property")] : []),
+  ];
+  const warnings = models.flatMap((model) => model.warnings);
+
+  return {
+    auditReady: warnings.length === 0,
+    warnings,
+    models,
+    note:
+      "Audit readiness checks provenance completeness; the user must still confirm that the abstraction, assumptions, omissions, and verification question are accurate.",
+  };
+}
+
 function parseProperty(value: unknown | undefined): StateMachine | undefined {
   return value === undefined ? undefined : parseStateMachine(value);
 }
@@ -192,9 +285,11 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
       }
     }
     validateProgressProperties(progressProperties, systemAlphabet);
+    const approvalAudit = buildApprovalAudit(machines, property);
 
     const result = {
       valid: true,
+      approvalAudit,
       components: machines.map(summarizeMachine),
       property: property
         ? {
@@ -217,7 +312,10 @@ export function validateModelTool(input: ValidateInput): Promise<CallToolResult>
     };
 
     return toolResult(
-      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.`,
+      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.` +
+        (approvalAudit.warnings.length
+          ? ` The model audit has ${approvalAudit.warnings.length} warning${approvalAudit.warnings.length === 1 ? "" : "s"}.`
+          : " The model provenance is ready for human approval."),
       result,
     );
   });
@@ -255,6 +353,7 @@ export function verifyLtsTool(input: VerifyInput): Promise<CallToolResult> {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
     const progressProperties = parseProgressProperties(input.progressProperties);
+    const approvalAudit = buildApprovalAudit(machines, property);
     const report = verifyStateMachines(machines, property, {
       maxStates: stateLimit(input),
       progressProperties,
@@ -275,6 +374,7 @@ export function verifyLtsTool(input: VerifyInput): Promise<CallToolResult> {
     const result: Record<string, unknown> = {
       passed: report.passed,
       verdict: report.passed ? "satisfied" : report.finding!.kind,
+      approvalAudit,
       finding,
       system: {
         ...summarizeMachine(report.system),

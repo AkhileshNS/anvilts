@@ -1,0 +1,720 @@
+{
+  "name": "chapter11_lts__AbstractPrimes__AFILTER__END",
+  "inputs": [
+    {
+      "name": "FILTER",
+      "alphabet": [
+        "in.get",
+        "in.get.eos",
+        "prime",
+        "out.put",
+        "out.put.eos",
+        "end"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 31
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 33
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 32
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 35
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 34
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 37
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 36
+        },
+        {
+          "from": 31,
+          "action": "in.get",
+          "to": 38
+        },
+        {
+          "from": 31,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 30,
+          "action": "prime",
+          "to": 31
+        },
+        {
+          "from": 33,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 32,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 35,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 34,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 37,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 36,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 39,
+          "action": "prime",
+          "to": 40
+        },
+        {
+          "from": 38,
+          "action": "out.put",
+          "to": 31
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 30
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 63
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 21
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 12
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 56
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 48
+        },
+        {
+          "from": 0,
+          "action": "in.get",
+          "to": 39
+        },
+        {
+          "from": 0,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "out.put.eos",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "end",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "prime",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 4
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 11
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 6
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 10
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 7
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 8
+        },
+        {
+          "from": 4,
+          "action": "in.get",
+          "to": 9
+        },
+        {
+          "from": 4,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 6,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 7,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 8,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 9,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 42
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 41
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 44
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 43
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 46
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 45
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 47
+        },
+        {
+          "from": 40,
+          "action": "in.get",
+          "to": 40
+        },
+        {
+          "from": 40,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 42,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 41,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 44,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 43,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 46,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 45,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 48,
+          "action": "prime",
+          "to": 49
+        },
+        {
+          "from": 47,
+          "action": "out.put",
+          "to": 40
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 53
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 52
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 55
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 54
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 49
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 51
+        },
+        {
+          "from": 49,
+          "action": "in.get",
+          "to": 50
+        },
+        {
+          "from": 49,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 51,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 50,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 53,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 52,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 55,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 11,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 54,
+          "action": "out.put",
+          "to": 49
+        },
+        {
+          "from": 10,
+          "action": "out.put",
+          "to": 4
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 57
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 59
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 58
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 60
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 62
+        },
+        {
+          "from": 57,
+          "action": "in.get",
+          "to": 61
+        },
+        {
+          "from": 57,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 20
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 13
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 15
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 14
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 17
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 16
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 19
+        },
+        {
+          "from": 13,
+          "action": "in.get",
+          "to": 18
+        },
+        {
+          "from": 13,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 56,
+          "action": "prime",
+          "to": 57
+        },
+        {
+          "from": 12,
+          "action": "prime",
+          "to": 13
+        },
+        {
+          "from": 59,
+          "action": "out.put",
+          "to": 57
+        },
+        {
+          "from": 15,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 58,
+          "action": "out.put",
+          "to": 57
+        },
+        {
+          "from": 14,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 17,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 16,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 19,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 18,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 60,
+          "action": "out.put",
+          "to": 57
+        },
+        {
+          "from": 62,
+          "action": "out.put",
+          "to": 57
+        },
+        {
+          "from": 61,
+          "action": "out.put",
+          "to": 57
+        },
+        {
+          "from": 64,
+          "action": "in.get",
+          "to": 64
+        },
+        {
+          "from": 64,
+          "action": "in.get",
+          "to": 66
+        },
+        {
+          "from": 64,
+          "action": "in.get",
+          "to": 65
+        },
+        {
+          "from": 64,
+          "action": "in.get",
+          "to": 68
+        },
+        {
+          "from": 64,
+          "action": "in.get",
+          "to": 67
+        },
+        {
+          "from": 64,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 20,
+          "action": "out.put",
+          "to": 13
+        },
+        {
+          "from": 63,
+          "action": "prime",
+          "to": 64
+        },
+        {
+          "from": 66,
+          "action": "out.put",
+          "to": 64
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 22
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 24
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 23
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 26
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 25
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 28
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 27
+        },
+        {
+          "from": 22,
+          "action": "in.get",
+          "to": 29
+        },
+        {
+          "from": 22,
+          "action": "in.get.eos",
+          "to": 1
+        },
+        {
+          "from": 65,
+          "action": "out.put",
+          "to": 64
+        },
+        {
+          "from": 21,
+          "action": "prime",
+          "to": 22
+        },
+        {
+          "from": 68,
+          "action": "out.put",
+          "to": 64
+        },
+        {
+          "from": 24,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 67,
+          "action": "out.put",
+          "to": 64
+        },
+        {
+          "from": 23,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 26,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 25,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 28,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 27,
+          "action": "out.put",
+          "to": 22
+        },
+        {
+          "from": 29,
+          "action": "out.put",
+          "to": 22
+        }
+      ]
+    }
+  ],
+  "progress": [
+    {
+      "name": "END",
+      "type": "progress",
+      "actions": [
+        "end"
+      ]
+    }
+  ],
+  "output": "no progress violation",
+  "meta": {
+    "category": "progress",
+    "source": "example/chapter11_lts/AbstractPrimes.lts",
+    "process": "AFILTER",
+    "propertyName": "END",
+    "componentCount": 1,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 69,
+      "transitions": 135
+    },
+    "terminalSetActions": [],
+    "prefixTrace": [],
+    "cycleTrace": []
+  }
+}

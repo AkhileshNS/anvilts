@@ -2,7 +2,7 @@
 
 AnviLTS is an MCP server for a reconstructed LTSA (Labelled Transition System Analyser) engine. It makes LTSA's academic verification capabilities available to users and AI coding agents through structured tools for modelling, composition, deadlock detection, safety-property verification, fair-choice progress analysis, and counterexample visualization.
 
-An agent can inspect concurrent code, construct a finite labelled transition system with the user, and submit that model to AnviLTS for exhaustive verification. This gives LLMs a mathematical way to test their concurrency claims, reducing the risk that a plausible explanation or proposed fix is accepted without proof.
+An agent can inspect concurrent code, construct a finite labelled transition system with the user, and submit that model to AnviLTS for exhaustive verification. Every modeled transition can retain repository-relative source evidence, while a model-wide abstraction ledger records assumptions, omissions, unresolved questions, and the source revision. This makes the human approval step auditable and gives LLMs a mathematical way to test their concurrency claims without hiding how code became a model.
 
 ```mermaid
 flowchart LR
@@ -17,7 +17,7 @@ flowchart LR
 
 AnviLTS runs as a local MCP server using the `stdio` transport and exposes four tools:
 
-- `validate_model`: validate component LTS definitions, optional safety monitors, and progress properties.
+- `validate_model`: validate component LTS definitions, provenance coverage, abstraction decisions, optional safety monitors, and progress properties.
 - `compose_lts`: construct the reachable parallel composition.
 - `verify_lts`: detect deadlocks, reserved ERROR states, safety-property violations, and LTSA-style progress violations.
 - `render_lts`: render a dark SVG state graph with an optional highlighted trace or recurrent terminal component.
@@ -80,7 +80,7 @@ This exercises a finite safety monitor: the service continues running, but one o
 
 This exercises conditional progress under LTSA fair choice: if snapshot retries recur infinitely, report completion must also recur. The worker keeps taking transitions, so the failure is not a deadlock.
 
-For each demo, Codex should inspect the code, propose a finite abstraction, and ask for confirmation. Once approved, AnviLTS validates the model and returns a shortest finite counterexample or a shortest prefix into a violating recurrent region. The user can then ask Codex to fix the implementation and verify the revised model.
+For each demo, Codex should inspect the code, attach file-and-line evidence to the proposed transitions, surface assumptions and omissions, and ask for confirmation. Once approved, AnviLTS returns a shortest finite counterexample or a shortest prefix into a violating recurrent region with the transition evidence preserved. The user can then ask Codex to fix the implementation and verify the revised model.
 
 AnviLTS proves the approved model under its stated assumptions. It does not claim that model extraction establishes source-code equivalence.
 
@@ -89,6 +89,7 @@ AnviLTS proves the approved model under its stated assumptions. It does not clai
 ```sh
 npm install
 npm run typecheck
+npm run test:provenance
 npm run test:progress
 npm run test:mcp
 npm run build
@@ -96,7 +97,7 @@ npm run test:plugin
 npm run parity
 ```
 
-`npm run parity` compares the engine against 52 LTSA textbook-derived fixtures. The current suite has full verdict and graph parity: 52/52, with zero graph differences.
+`npm run parity` compares the engine against 62 LTSA textbook-derived fixtures. The current suite has full verdict and graph parity: 62/62, with zero graph differences.
 
 ## Verification semantics
 

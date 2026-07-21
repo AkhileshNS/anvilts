@@ -33919,6 +33919,108 @@ var TAU = "tau";
 function isObject2(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+function nonEmptyString(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+function parseStringList(value, field) {
+  if (!Array.isArray(value) || !value.every(nonEmptyString)) {
+    throw new Error(`${field} must be an array of non-empty strings.`);
+  }
+  if (new Set(value).size !== value.length) {
+    throw new Error(`${field} must not contain duplicate entries.`);
+  }
+  return [...value];
+}
+function parseTransitionEvidence(value, transitionIndex, evidenceIndex) {
+  const field = `Transition ${transitionIndex} evidence ${evidenceIndex}`;
+  if (!isObject2(value)) {
+    throw new Error(`${field} must be an object.`);
+  }
+  if (!nonEmptyString(value.explanation)) {
+    throw new Error(`${field} field "explanation" must be a non-empty string.`);
+  }
+  if (value.kind === "code") {
+    if (!nonEmptyString(value.path)) {
+      throw new Error(`${field} field "path" must be a non-empty string.`);
+    }
+    const normalizedPath = value.path.replaceAll("\\", "/");
+    if (/^(?:[A-Za-z]:|\/)/.test(normalizedPath) || normalizedPath.split("/").includes("..")) {
+      throw new Error(
+        `${field} field "path" must be relative to the source repository.`
+      );
+    }
+    if (!Number.isInteger(value.startLine) || Number(value.startLine) < 1) {
+      throw new Error(`${field} field "startLine" must be a positive integer.`);
+    }
+    if (value.endLine !== void 0 && (!Number.isInteger(value.endLine) || Number(value.endLine) < Number(value.startLine))) {
+      throw new Error(
+        `${field} field "endLine" must be an integer at or after "startLine".`
+      );
+    }
+    if (value.symbol !== void 0 && !nonEmptyString(value.symbol)) {
+      throw new Error(`${field} field "symbol" must be a non-empty string.`);
+    }
+    return {
+      kind: "code",
+      path: normalizedPath,
+      startLine: Number(value.startLine),
+      ...value.endLine === void 0 ? {} : { endLine: Number(value.endLine) },
+      ...value.symbol === void 0 ? {} : { symbol: value.symbol },
+      explanation: value.explanation
+    };
+  }
+  if (value.kind !== "user-stated" && value.kind !== "assumption" && value.kind !== "environment" && value.kind !== "derived") {
+    throw new Error(
+      `${field} field "kind" must be "code", "user-stated", "assumption", "environment", or "derived".`
+    );
+  }
+  return {
+    kind: value.kind,
+    explanation: value.explanation
+  };
+}
+function mergeEvidence(...evidenceSets) {
+  const merged = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const evidence of evidenceSets.flatMap((set2) => set2 ?? [])) {
+    const key = JSON.stringify(evidence);
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(evidence);
+    }
+  }
+  return merged.length === 0 ? void 0 : merged;
+}
+function mergeAbstractions(machines) {
+  const abstractions = machines.flatMap(
+    (machine) => machine.abstraction === void 0 ? [] : [machine.abstraction]
+  );
+  if (abstractions.length === 0) {
+    return void 0;
+  }
+  const revisions = [
+    ...new Set(
+      abstractions.flatMap(
+        (abstraction) => abstraction.sourceRevision === void 0 ? [] : [abstraction.sourceRevision]
+      )
+    )
+  ];
+  const mergeList = (select) => [
+    ...new Set(abstractions.flatMap(select))
+  ];
+  const unresolved = mergeList((abstraction) => abstraction.unresolved);
+  if (revisions.length > 1) {
+    unresolved.push(
+      `Component models reference multiple source revisions: ${revisions.join(", ")}.`
+    );
+  }
+  return {
+    ...revisions.length === 1 ? { sourceRevision: revisions[0] } : {},
+    assumptions: mergeList((abstraction) => abstraction.assumptions),
+    omissions: mergeList((abstraction) => abstraction.omissions),
+    unresolved: [...new Set(unresolved)]
+  };
+}
 function isState(value) {
   if (typeof value === "number") {
     return Number.isInteger(value) && value >= 0;
@@ -33989,18 +34091,60 @@ function parseStateMachine(value) {
         `Transition ${index} field "to" must be a non-negative integer or a non-empty tuple of states.`
       );
     }
+    let evidence;
+    if (candidate.evidence !== void 0) {
+      if (!Array.isArray(candidate.evidence) || candidate.evidence.length === 0) {
+        throw new Error(
+          `Transition ${index} field "evidence" must be a non-empty array.`
+        );
+      }
+      evidence = candidate.evidence.map(
+        (item, evidenceIndex) => parseTransitionEvidence(item, index, evidenceIndex)
+      );
+      if (mergeEvidence(evidence)?.length !== evidence.length) {
+        throw new Error(`Transition ${index} evidence must not contain duplicates.`);
+      }
+    }
     transitions.push({
       from: candidate.from,
       action: candidate.action,
-      to: candidate.to
+      to: candidate.to,
+      ...evidence === void 0 ? {} : { evidence }
     });
+  }
+  let abstraction;
+  if (value.abstraction !== void 0) {
+    if (!isObject2(value.abstraction)) {
+      throw new Error('"abstraction" must be an object.');
+    }
+    if (value.abstraction.sourceRevision !== void 0 && !nonEmptyString(value.abstraction.sourceRevision)) {
+      throw new Error(
+        '"abstraction.sourceRevision" must be a non-empty string.'
+      );
+    }
+    abstraction = {
+      ...value.abstraction.sourceRevision === void 0 ? {} : { sourceRevision: value.abstraction.sourceRevision },
+      assumptions: parseStringList(
+        value.abstraction.assumptions ?? [],
+        '"abstraction.assumptions"'
+      ),
+      omissions: parseStringList(
+        value.abstraction.omissions ?? [],
+        '"abstraction.omissions"'
+      ),
+      unresolved: parseStringList(
+        value.abstraction.unresolved ?? [],
+        '"abstraction.unresolved"'
+      )
+    };
   }
   return {
     name: value.name,
     alphabet: [...value.alphabet],
     initial: value.initial,
     end,
-    transitions
+    transitions,
+    ...abstraction === void 0 ? {} : { abstraction }
   };
 }
 
@@ -34022,11 +34166,7 @@ function buildTrace(state, parents) {
   let key = stateKey(state);
   while (parents.has(key)) {
     const parent = parents.get(key);
-    trace.unshift({
-      from: parent.previous,
-      action: parent.action,
-      to: parent.current
-    });
+    trace.unshift(parent.transition);
     key = stateKey(parent.previous);
   }
   return trace;
@@ -34067,8 +34207,7 @@ function exploreReachable(options) {
         visited.add(key);
         parents.set(key, {
           previous: state,
-          action: transition.action,
-          current: transition.to
+          transition
         });
         worklist.push(transition.to);
       }
@@ -34164,7 +34303,8 @@ function composeStateMachines(machines, options = {}) {
             eligible.push({
               from: [...compositeState],
               action: TAU,
-              to: normalizeTarget(target)
+              to: normalizeTarget(target),
+              ...transition.evidence === void 0 ? {} : { evidence: transition.evidence }
             });
           }
         }
@@ -34177,25 +34317,32 @@ function composeStateMachines(machines, options = {}) {
       if (enabledByParticipant.length === 0 || enabledByParticipant.some((enabled) => enabled.length === 0)) {
         continue;
       }
-      let targets = [[...compositeState]];
+      let targets = [{ state: [...compositeState], contributors: [] }];
       for (let participant = 0; participant < participatingMachines.length; participant += 1) {
         const machineIndex = participatingMachines[participant];
         const enabled = enabledByParticipant[participant];
         const nextTargets = [];
         for (const target of targets) {
           for (const transition of enabled) {
-            const nextTarget = [...target];
+            const nextTarget = [...target.state];
             nextTarget[machineIndex] = transition.to;
-            nextTargets.push(nextTarget);
+            nextTargets.push({
+              state: nextTarget,
+              contributors: [...target.contributors, transition]
+            });
           }
         }
         targets = nextTargets;
       }
       for (const target of targets) {
+        const evidence = mergeEvidence(
+          ...target.contributors.map((transition) => transition.evidence)
+        );
         eligible.push({
           from: [...compositeState],
           action,
-          to: normalizeTarget(target)
+          to: normalizeTarget(target.state),
+          ...evidence === void 0 ? {} : { evidence }
         });
       }
     }
@@ -34210,12 +34357,14 @@ function composeStateMachines(machines, options = {}) {
     isError: (state) => state === ERROR_STATE,
     maxStates: options.maxStates
   });
+  const abstraction = mergeAbstractions(machines);
   return {
     name: machines.map((machine) => machine.name).join(" || "),
     alphabet,
     initial,
     end: canTerminate ? END_STATE : NO_END,
-    transitions: result.transitions
+    transitions: result.transitions,
+    ...abstraction === void 0 ? {} : { abstraction }
   };
 }
 
@@ -34253,12 +34402,32 @@ function completeProperty(property) {
           throw new Error("Transitions from ERROR must return to ERROR.");
         }
         if (matching.length === 0) {
-          transitions.push({ from: ERROR_STATE, action, to: ERROR_STATE });
+          transitions.push({
+            from: ERROR_STATE,
+            action,
+            to: ERROR_STATE,
+            evidence: [
+              {
+                kind: "derived",
+                explanation: `ERROR remains absorbing for action ${JSON.stringify(action)}.`
+              }
+            ]
+          });
         }
         continue;
       }
       if (matching.length === 0) {
-        transitions.push({ from: state, action, to: ERROR_STATE });
+        transitions.push({
+          from: state,
+          action,
+          to: ERROR_STATE,
+          evidence: [
+            {
+              kind: "derived",
+              explanation: `Safety property ${JSON.stringify(property.name)} disallows ${JSON.stringify(action)} from state ${stateKey(state)}.`
+            }
+          ]
+        });
       }
     }
   }
@@ -34310,6 +34479,7 @@ function monitorProperty(system, propertyDefinition, options = {}) {
     return (systemOutgoing.get(stateKey(systemState)) ?? []).map(
       (systemTransition) => {
         let nextPropertyState = propertyState;
+        let propertyTransition;
         if (systemTransition.action !== TAU && relevantActions.has(systemTransition.action)) {
           const key = `${stateKey(propertyState)}\0${systemTransition.action}`;
           const matching = propertyOutgoing.get(key) ?? [];
@@ -34318,12 +34488,18 @@ function monitorProperty(system, propertyDefinition, options = {}) {
               `Completed property expected one transition from ${stateKey(propertyState)} for action ${JSON.stringify(systemTransition.action)}.`
             );
           }
-          nextPropertyState = matching[0].to;
+          propertyTransition = matching[0];
+          nextPropertyState = propertyTransition.to;
         }
+        const evidence = mergeEvidence(
+          systemTransition.evidence,
+          propertyTransition?.evidence
+        );
         return {
           from: state,
           action: systemTransition.action,
-          to: normalizeTarget(systemTransition.to, nextPropertyState)
+          to: normalizeTarget(systemTransition.to, nextPropertyState),
+          ...evidence === void 0 ? {} : { evidence }
         };
       }
     );
@@ -34336,12 +34512,14 @@ function monitorProperty(system, propertyDefinition, options = {}) {
     isError: (state) => state === ERROR_STATE,
     maxStates: options.maxStates
   });
+  const abstraction = mergeAbstractions([system, propertyDefinition]);
   return {
     name: `${system.name} monitored by ${property.name}`,
     alphabet: [...system.alphabet],
     initial,
     end: system.end === NO_END ? NO_END : END_STATE,
-    transitions: result.transitions
+    transitions: result.transitions,
+    ...abstraction === void 0 ? {} : { abstraction }
   };
 }
 
@@ -34370,6 +34548,19 @@ function collectStates(machine) {
 }
 function transitionKey(transition) {
   return `${stateKey(transition.from)}\0${transition.action}\0${stateKey(transition.to)}`;
+}
+function evidenceTooltip(transition) {
+  if (!transition.evidence?.length) {
+    return void 0;
+  }
+  return transition.evidence.map((evidence) => {
+    if (evidence.kind !== "code") {
+      return `${evidence.kind}: ${evidence.explanation}`;
+    }
+    const lines = evidence.endLine === void 0 || evidence.endLine === evidence.startLine ? `${evidence.startLine}` : `${evidence.startLine}-${evidence.endLine}`;
+    const symbol2 = evidence.symbol ? ` (${evidence.symbol})` : "";
+    return `${evidence.path}:${lines}${symbol2} \u2014 ${evidence.explanation}`;
+  }).join("\n");
 }
 function buildMachineDot(machine, options = {}) {
   const orientation = options.orientation ?? "horizontal";
@@ -34423,6 +34614,10 @@ function buildMachineDot(machine, options = {}) {
       `fontcolor="${font}"`,
       `penwidth="${isInTrace || enabled || isHighlighted ? "2.4" : "1.1"}"`
     ];
+    const tooltip = evidenceTooltip(transition);
+    if (tooltip !== void 0) {
+      attributes.push(`tooltip="${escapeDot(tooltip)}"`);
+    }
     return `${nodeIdByState.get(stateKey(transition.from))} -> ${nodeIdByState.get(
       stateKey(transition.to)
     )} [${attributes.join(", ")}];`;
@@ -34834,6 +35029,81 @@ function summarizeMachine(machine) {
     terminating: machine.end !== NO_END
   };
 }
+function auditMachine(machine, role) {
+  const uncitedTransitions = machine.transitions.flatMap(
+    (transition, index) => transition.evidence?.length ? [] : [
+      {
+        index,
+        from: transition.from,
+        action: transition.action,
+        to: transition.to
+      }
+    ]
+  );
+  const codeBackedTransitions = machine.transitions.filter(
+    (transition) => transition.evidence?.some((evidence) => evidence.kind === "code")
+  ).length;
+  const evidenceByKind = {
+    code: 0,
+    "user-stated": 0,
+    assumption: 0,
+    environment: 0,
+    derived: 0
+  };
+  for (const transition of machine.transitions) {
+    for (const evidence of transition.evidence ?? []) {
+      evidenceByKind[evidence.kind] += 1;
+    }
+  }
+  const abstraction = machine.abstraction ?? {
+    assumptions: [],
+    omissions: [],
+    unresolved: []
+  };
+  const warnings = [];
+  if (uncitedTransitions.length > 0) {
+    warnings.push(
+      `${machine.name}: ${uncitedTransitions.length} of ${machine.transitions.length} transitions have no provenance evidence.`
+    );
+  }
+  if (codeBackedTransitions > 0 && abstraction.sourceRevision === void 0) {
+    warnings.push(
+      `${machine.name}: code evidence is present but abstraction.sourceRevision is missing.`
+    );
+  }
+  if (abstraction.unresolved.length > 0) {
+    warnings.push(
+      `${machine.name}: ${abstraction.unresolved.length} unresolved abstraction item${abstraction.unresolved.length === 1 ? " remains" : "s remain"}.`
+    );
+  }
+  return {
+    name: machine.name,
+    role,
+    sourceRevision: abstraction.sourceRevision ?? null,
+    totalTransitions: machine.transitions.length,
+    evidencedTransitions: machine.transitions.length - uncitedTransitions.length,
+    codeBackedTransitions,
+    evidenceReferences: evidenceByKind,
+    uncitedTransitions,
+    assumptions: abstraction.assumptions,
+    omissions: abstraction.omissions,
+    unresolved: abstraction.unresolved,
+    warnings
+  };
+}
+function buildApprovalAudit(machines, property) {
+  const models = [
+    ...machines.map((machine) => auditMachine(machine, "component")),
+    ...property ? [auditMachine(property, "property")] : []
+  ];
+  const warnings = models.flatMap((model) => model.warnings);
+  return {
+    auditReady: warnings.length === 0,
+    warnings,
+    models,
+    note: "Audit readiness checks provenance completeness; the user must still confirm that the abstraction, assumptions, omissions, and verification question are accurate."
+  };
+}
 function parseProperty(value) {
   return value === void 0 ? void 0 : parseStateMachine(value);
 }
@@ -34893,8 +35163,10 @@ function validateModelTool(input) {
       }
     }
     validateProgressProperties(progressProperties, systemAlphabet);
+    const approvalAudit = buildApprovalAudit(machines, property);
     const result = {
       valid: true,
+      approvalAudit,
       components: machines.map(summarizeMachine),
       property: property ? {
         ...summarizeMachine(property),
@@ -34912,7 +35184,7 @@ function validateModelTool(input) {
       }
     };
     return toolResult(
-      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.`,
+      `Validated ${machines.length} component${machines.length === 1 ? "" : "s"}${property ? " and one safety property" : ""}${progressProperties.length ? ` and ${progressProperties.length} progress propert${progressProperties.length === 1 ? "y" : "ies"}` : ""}.` + (approvalAudit.warnings.length ? ` The model audit has ${approvalAudit.warnings.length} warning${approvalAudit.warnings.length === 1 ? "" : "s"}.` : " The model provenance is ready for human approval."),
       result
     );
   });
@@ -34946,6 +35218,7 @@ function verifyLtsTool(input) {
     const machines = parseMachines(input.machines);
     const property = parseProperty(input.property);
     const progressProperties = parseProgressProperties(input.progressProperties);
+    const approvalAudit = buildApprovalAudit(machines, property);
     const report = verifyStateMachines(machines, property, {
       maxStates: stateLimit(input),
       progressProperties
@@ -34964,6 +35237,7 @@ function verifyLtsTool(input) {
     const result = {
       passed: report.passed,
       verdict: report.passed ? "satisfied" : report.finding.kind,
+      approvalAudit,
       finding,
       system: {
         ...summarizeMachine(report.system),
@@ -35044,17 +35318,38 @@ var stateSchema = external_exports.union([
   external_exports.enum(["END", "ERROR"]),
   external_exports.array(external_exports.unknown()).min(1)
 ]);
+var evidenceSchema = external_exports.discriminatedUnion("kind", [
+  external_exports.object({
+    kind: external_exports.literal("code"),
+    path: external_exports.string().min(1).describe("Repository-relative source path supporting this transition."),
+    startLine: external_exports.number().int().positive(),
+    endLine: external_exports.number().int().positive().optional(),
+    symbol: external_exports.string().min(1).optional(),
+    explanation: external_exports.string().min(1).describe("Why this source location justifies the modeled behavior.")
+  }),
+  external_exports.object({
+    kind: external_exports.enum(["user-stated", "assumption", "environment", "derived"]),
+    explanation: external_exports.string().min(1)
+  })
+]);
 var transitionSchema = external_exports.object({
   from: stateSchema,
   action: external_exports.string().min(1),
-  to: stateSchema
+  to: stateSchema,
+  evidence: external_exports.array(evidenceSchema).min(1).optional().describe("Auditable evidence supporting this abstract transition.")
 });
 var machineSchema = external_exports.object({
   name: external_exports.string().min(1),
   alphabet: external_exports.array(external_exports.string().min(1)),
   initial: stateSchema,
   end: external_exports.union([external_exports.literal(-1), stateSchema]).optional(),
-  transitions: external_exports.array(transitionSchema)
+  transitions: external_exports.array(transitionSchema),
+  abstraction: external_exports.object({
+    sourceRevision: external_exports.string().min(1).optional().describe("Commit, tree, or other immutable source revision modeled."),
+    assumptions: external_exports.array(external_exports.string().min(1)).optional(),
+    omissions: external_exports.array(external_exports.string().min(1)).optional(),
+    unresolved: external_exports.array(external_exports.string().min(1)).optional()
+  }).optional().describe("Model-wide abstraction decisions that require human review.")
 });
 var machinesSchema = external_exports.array(machineSchema).min(1).describe("Component LTS definitions approved by the user.");
 var actionSetSchema = external_exports.array(external_exports.string().min(1)).min(1).describe('Observable action names; the internal action "tau" is not allowed.');
@@ -35088,14 +35383,14 @@ function createAnviLtsServer() {
   const server2 = new McpServer(
     { name: "anvilts", version: "0.1.0" },
     {
-      instructions: "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction and describe results as claims about that model and its assumptions."
+      instructions: "Deterministic labelled-transition-system validation, composition, safety and fair-choice progress verification, and visualization. Verify only a user-approved abstraction, retain source evidence on transitions, resolve provenance warnings before verification, and describe results as claims about that model and its assumptions."
     }
   );
   server2.registerTool(
     "validate_model",
     {
       title: "Validate LTS model",
-      description: "Validate component LTS JSON, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use after the user confirms the proposed components, actions, fairness assumptions, and verification question.",
+      description: "Validate component LTS JSON, transition provenance, model-wide abstraction decisions, an optional passive safety-property monitor, and optional LTSA-style progress properties before composition. Use its audit warnings during human approval.",
       inputSchema: {
         machines: machinesSchema,
         property: machineSchema.optional(),

@@ -48,8 +48,7 @@ export interface ReachabilityResult<StateType extends State = State> {
 
 interface Parent<StateType extends State> {
   previous: StateType;
-  action: string;
-  current: StateType;
+  transition: Transition<StateType>;
 }
 
 function buildTrace<StateType extends State>(
@@ -61,11 +60,7 @@ function buildTrace<StateType extends State>(
 
   while (parents.has(key)) {
     const parent = parents.get(key)!;
-    trace.unshift({
-      from: parent.previous,
-      action: parent.action,
-      to: parent.current,
-    });
+    trace.unshift(parent.transition);
     key = stateKey(parent.previous);
   }
 
@@ -124,8 +119,7 @@ export function exploreReachable<StateType extends State>(
         visited.add(key);
         parents.set(key, {
           previous: state,
-          action: transition.action,
-          current: transition.to,
+          transition,
         });
         worklist.push(transition.to);
       }

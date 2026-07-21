@@ -11,9 +11,20 @@ const workerA = {
   alphabet: ["a.enter", "a.exit"],
   initial: 0,
   transitions: [
-    { from: 0, action: "a.enter", to: 1 },
-    { from: 1, action: "a.exit", to: 0 },
+    {
+      from: 0,
+      action: "a.enter",
+      to: 1,
+      evidence: [{ kind: "code", path: "src/a.ts", startLine: 10, explanation: "Worker A enters." }],
+    },
+    {
+      from: 1,
+      action: "a.exit",
+      to: 0,
+      evidence: [{ kind: "code", path: "src/a.ts", startLine: 11, explanation: "Worker A exits." }],
+    },
   ],
+  abstraction: { sourceRevision: "test-revision", assumptions: [], omissions: [], unresolved: [] },
 };
 
 const workerB = {
@@ -21,9 +32,20 @@ const workerB = {
   alphabet: ["b.enter", "b.exit"],
   initial: 0,
   transitions: [
-    { from: 0, action: "b.enter", to: 1 },
-    { from: 1, action: "b.exit", to: 0 },
+    {
+      from: 0,
+      action: "b.enter",
+      to: 1,
+      evidence: [{ kind: "code", path: "src/b.ts", startLine: 10, explanation: "Worker B enters." }],
+    },
+    {
+      from: 1,
+      action: "b.exit",
+      to: 0,
+      evidence: [{ kind: "code", path: "src/b.ts", startLine: 11, explanation: "Worker B exits." }],
+    },
   ],
+  abstraction: { sourceRevision: "test-revision", assumptions: [], omissions: [], unresolved: [] },
 };
 
 const mutexProperty = {
@@ -31,11 +53,12 @@ const mutexProperty = {
   alphabet: ["a.enter", "a.exit", "b.enter", "b.exit"],
   initial: 0,
   transitions: [
-    { from: 0, action: "a.enter", to: 1 },
-    { from: 0, action: "b.enter", to: 2 },
-    { from: 1, action: "a.exit", to: 0 },
-    { from: 2, action: "b.exit", to: 0 },
+    { from: 0, action: "a.enter", to: 1, evidence: [{ kind: "user-stated", explanation: "A may enter while idle." }] },
+    { from: 0, action: "b.enter", to: 2, evidence: [{ kind: "user-stated", explanation: "B may enter while idle." }] },
+    { from: 1, action: "a.exit", to: 0, evidence: [{ kind: "user-stated", explanation: "A releases ownership." }] },
+    { from: 2, action: "b.exit", to: 0, evidence: [{ kind: "user-stated", explanation: "B releases ownership." }] },
   ],
+  abstraction: { assumptions: [], omissions: [], unresolved: [] },
 };
 
 const server = createAnviLtsServer();
@@ -67,6 +90,11 @@ const validation = (await client.callTool({
 })) as CallToolResult;
 assert.equal(validation.isError, undefined);
 assert.equal(validation.structuredContent?.valid, true);
+assert.equal(
+  (validation.structuredContent?.approvalAudit as { auditReady?: boolean })
+    .auditReady,
+  true,
+);
 
 const verification = (await client.callTool({
   name: "verify_lts",
@@ -77,9 +105,14 @@ assert.equal(verification.structuredContent?.passed, false);
 assert.equal(verification.structuredContent?.verdict, "property-violation");
 
 const finding = verification.structuredContent?.finding as
-  | { trace?: unknown[] }
+  | { trace?: Array<{ evidence?: Array<{ kind?: string }> }> }
   | undefined;
 assert.equal(finding?.trace?.length, 2);
+assert(finding?.trace?.every((transition) => transition.evidence?.length));
+assert.equal(
+  finding?.trace?.[1]?.evidence?.at(-1)?.kind,
+  "derived",
+);
 
 const rendering = (await client.callTool({
   name: "render_lts",

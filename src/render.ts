@@ -50,6 +50,27 @@ function transitionKey(transition: Transition): string {
   return `${stateKey(transition.from)}\u0000${transition.action}\u0000${stateKey(transition.to)}`;
 }
 
+function evidenceTooltip(transition: Transition): string | undefined {
+  if (!transition.evidence?.length) {
+    return undefined;
+  }
+
+  return transition.evidence
+    .map((evidence) => {
+      if (evidence.kind !== "code") {
+        return `${evidence.kind}: ${evidence.explanation}`;
+      }
+
+      const lines =
+        evidence.endLine === undefined || evidence.endLine === evidence.startLine
+          ? `${evidence.startLine}`
+          : `${evidence.startLine}-${evidence.endLine}`;
+      const symbol = evidence.symbol ? ` (${evidence.symbol})` : "";
+      return `${evidence.path}:${lines}${symbol} — ${evidence.explanation}`;
+    })
+    .join("\n");
+}
+
 export function buildMachineDot(
   machine: StateMachine,
   options: MachineDotOptions = {},
@@ -135,6 +156,11 @@ export function buildMachineDot(
       `fontcolor="${font}"`,
       `penwidth="${isInTrace || enabled || isHighlighted ? "2.4" : "1.1"}"`,
     ];
+    const tooltip = evidenceTooltip(transition);
+
+    if (tooltip !== undefined) {
+      attributes.push(`tooltip="${escapeDot(tooltip)}"`);
+    }
 
     return `${nodeIdByState.get(stateKey(transition.from))} -> ${nodeIdByState.get(
       stateKey(transition.to),

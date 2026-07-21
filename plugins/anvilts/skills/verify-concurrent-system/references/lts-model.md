@@ -9,10 +9,36 @@
   "initial": 0,
   "end": -1,
   "transitions": [
-    { "from": 0, "action": "request", "to": 1 },
-    { "from": 1, "action": "acquire", "to": 2 },
-    { "from": 2, "action": "release", "to": 0 }
-  ]
+    {
+      "from": 0,
+      "action": "request",
+      "to": 1,
+      "evidence": [{
+        "kind": "code",
+        "path": "src/worker.ts",
+        "startLine": 24,
+        "endLine": 29,
+        "symbol": "Worker.accept",
+        "explanation": "accept() queues the request and makes acquisition eligible."
+      }]
+    },
+    {
+      "from": 1,
+      "action": "acquire",
+      "to": 2,
+      "evidence": [{
+        "kind": "environment",
+        "explanation": "The configured lock service eventually grants an available lock."
+      }]
+    },
+    { "from": 2, "action": "release", "to": 0, "evidence": [{ "kind": "code", "path": "src/worker.ts", "startLine": 41, "symbol": "Worker.finish", "explanation": "finish() releases the held lock." }] }
+  ],
+  "abstraction": {
+    "sourceRevision": "git:3d8d46f",
+    "assumptions": ["The lock service grants at most one holder."],
+    "omissions": ["Request payload contents do not affect lock ordering."],
+    "unresolved": []
+  }
 }
 ```
 
@@ -21,6 +47,20 @@
 - `initial`: non-negative integer state. Tuple states and reserved `END`/`ERROR` states are accepted for generated products.
 - `end`: omit or use `-1` for a non-terminating component; otherwise provide its designated terminating state.
 - `transitions`: directed labelled edges. Multiple edges with the same source and action preserve nondeterminism.
+- `evidence`: one or more reasons the edge exists. Use repository-relative paths for code citations. `startLine` is one-based; `endLine` and `symbol` are optional. Every entry needs an explanation connecting the evidence to the transition.
+- `abstraction`: model-wide audit information. Record the source revision or snapshot, assumptions, deliberate omissions, and unresolved questions. Omitted arrays default to empty arrays.
+
+Evidence kinds are:
+
+- `code`: source-backed behavior with `path`, `startLine`, optional `endLine` and `symbol`, plus `explanation`;
+- `user-stated`: behavior explicitly confirmed by the user;
+- `assumption`: a simplification on which the result depends;
+- `environment`: behavior supplied by an external system or configuration;
+- `derived`: a mechanical consequence of the model, such as a missing safety-monitor action entering ERROR.
+
+Evidence is descriptive metadata and never affects composition or verification semantics. Private and tau transitions retain their evidence. A synchronized composite edge merges the evidence of every participating component edge. Safety-product edges retain system evidence and add relevant monitor evidence. Counterexample traces therefore remain source-auditable.
+
+`validate_model` returns an `approvalAudit` with uncited transitions, evidence coverage, source revision, assumptions, omissions, unresolved items, and warnings. Treat `auditReady: true` as ready to present for human approval, not as approval itself.
 
 States are identifiers, not event names. Give their meanings in the abstraction proposal.
 

@@ -1,0 +1,62 @@
+{
+  "name": "chapter7_lts__Coin__COIN__HEADS",
+  "inputs": [
+    {
+      "name": "COIN",
+      "alphabet": [
+        "toss",
+        "tails",
+        "heads"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 0,
+          "action": "toss",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "toss",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "tails",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "heads",
+          "to": 0
+        }
+      ]
+    }
+  ],
+  "progress": [
+    {
+      "name": "HEADS",
+      "type": "progress",
+      "actions": [
+        "heads"
+      ]
+    }
+  ],
+  "output": "no progress violation",
+  "meta": {
+    "category": "progress",
+    "source": "example/chapter7_lts/Coin.lts",
+    "process": "COIN",
+    "propertyName": "HEADS",
+    "componentCount": 1,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 3,
+      "transitions": 4
+    },
+    "terminalSetActions": [],
+    "prefixTrace": [],
+    "cycleTrace": []
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "chapter7_lts__Twocoin__TC__HEADSorTAILS",
+  "inputs": [
+    {
+      "name": "TWOCOIN",
+      "alphabet": [
+        "toss",
+        "tails",
+        "heads",
+        "pick"
+      ],
+      "initial": 0,
+      "end": -1,
+      "transitions": [
+        {
+          "from": 3,
+          "action": "toss",
+          "to": 4
+        },
+        {
+          "from": 3,
+          "action": "toss",
+          "to": 5
+        },
+        {
+          "from": 4,
+          "action": "tails",
+          "to": 3
+        },
+        {
+          "from": 5,
+          "action": "heads",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "pick",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "pick",
+          "to": 1
+        },
+        {
+          "from": 1,
+          "action": "toss",
+          "to": 2
+        },
+        {
+          "from": 2,
+          "action": "heads",
+          "to": 1
+        }
+      ]
+    }
+  ],
+  "progress": [
+    {
+      "name": "HEADSorTAILS",
+      "type": "progress",
+      "actions": [
+        "heads",
+        "tails"
+      ]
+    }
+  ],
+  "output": "no progress violation",
+  "meta": {
+    "category": "progress",
+    "source": "example/chapter7_lts/Twocoin.lts",
+    "process": "TC",
+    "propertyName": "HEADSorTAILS",
+    "componentCount": 1,
+    "exactCounts": true,
+    "expectedComposite": {
+      "states": 6,
+      "transitions": 8
+    },
+    "terminalSetActions": [],
+    "prefixTrace": [],
+    "cycleTrace": []
+  }
+}
