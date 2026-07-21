@@ -30,7 +30,7 @@ The built MCP server entry point is:
 plugins/anvilts/mcp/server.mjs
 ```
 
-For example, a VS Code workspace can add `.vscode/mcp.json`:
+Or for example, a VS Code workspace can add `.vscode/mcp.json`:
 
 ```json
 {
