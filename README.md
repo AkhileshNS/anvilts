@@ -1,3 +1,5 @@
+![Anvilts - MCP Server for LTSA](./icon.png)
+
 # AnviLTS
 
 AnviLTS is an MCP server for a reconstructed LTSA (Labelled Transition System Analyser) engine. It makes LTSA's academic verification capabilities available to users and AI coding agents through structured tools for modelling, composition, deadlock detection, safety-property verification, fair-choice progress analysis, and counterexample visualization.
