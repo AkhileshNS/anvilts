@@ -1,7 +1,8 @@
 {
-  "count": 52,
+  "count": 62,
   "deadlock": 44,
   "safety": 8,
+  "progress": 10,
   "cases": [
     {
       "name": "chapter10_lts__Port_recursive__APORT",
@@ -42,6 +43,22 @@
       "output": "no deadlock",
       "source": "example/chapter10_lts/SynchMsgDemo.lts",
       "process": "SyncMsg"
+    },
+    {
+      "name": "chapter11_lts__AbstractPrimes__AFILTER__END",
+      "file": "chapter11_lts__AbstractPrimes__AFILTER__END.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter11_lts/AbstractPrimes.lts",
+      "process": "AFILTER"
+    },
+    {
+      "name": "chapter11_lts__AbstractPrimes__AGEN__END",
+      "file": "chapter11_lts__AbstractPrimes__AGEN__END.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter11_lts/AbstractPrimes.lts",
+      "process": "AGEN"
     },
     {
       "name": "chapter11_lts__Primes__PRIMES",
@@ -332,6 +349,22 @@
       "process": "SYS"
     },
     {
+      "name": "chapter7_lts__Coin__COIN__HEADS",
+      "file": "chapter7_lts__Coin__COIN__HEADS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Coin.lts",
+      "process": "COIN"
+    },
+    {
+      "name": "chapter7_lts__Coin__COIN__TAILS",
+      "file": "chapter7_lts__Coin__COIN__TAILS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Coin.lts",
+      "process": "COIN"
+    },
+    {
       "name": "chapter7_lts__CongestedSingleLaneBridge__SingleLaneBridge",
       "file": "chapter7_lts__CongestedSingleLaneBridge__SingleLaneBridge.json",
       "category": "safety",
@@ -388,10 +421,58 @@
       "process": "RUN"
     },
     {
+      "name": "chapter7_lts__Twocoin__RUN__HEADS",
+      "file": "chapter7_lts__Twocoin__RUN__HEADS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "RUN"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__RUN__HEADSorTAILS",
+      "file": "chapter7_lts__Twocoin__RUN__HEADSorTAILS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "RUN"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__RUN__TAILS",
+      "file": "chapter7_lts__Twocoin__RUN__TAILS.json",
+      "category": "progress",
+      "output": "progress violation",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "RUN"
+    },
+    {
       "name": "chapter7_lts__Twocoin__TC",
       "file": "chapter7_lts__Twocoin__TC.json",
       "category": "deadlock",
       "output": "no deadlock",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "TC"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__TC__HEADS",
+      "file": "chapter7_lts__Twocoin__TC__HEADS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "TC"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__TC__HEADSorTAILS",
+      "file": "chapter7_lts__Twocoin__TC__HEADSorTAILS.json",
+      "category": "progress",
+      "output": "no progress violation",
+      "source": "example/chapter7_lts/Twocoin.lts",
+      "process": "TC"
+    },
+    {
+      "name": "chapter7_lts__Twocoin__TC__TAILS",
+      "file": "chapter7_lts__Twocoin__TC__TAILS.json",
+      "category": "progress",
+      "output": "progress violation",
       "source": "example/chapter7_lts/Twocoin.lts",
       "process": "TC"
     },

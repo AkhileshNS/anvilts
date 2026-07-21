@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from typing import Protocol
 
 
 @dataclass
@@ -9,6 +10,11 @@ class Session:
     token: str
     user_id: str
     key_epoch: int
+
+
+class TokenSigner(Protocol):
+    async def sign(self, token: str, key_epoch: int) -> str:
+        ...
 
 
 class KeyRing:
@@ -36,25 +42,28 @@ class KeyRing:
 
 
 class SessionRegistry:
-    def __init__(self, keys: KeyRing) -> None:
+    def __init__(self, keys: KeyRing, signer: TokenSigner) -> None:
         self._keys = keys
+        self._signer = signer
         self._sessions: dict[str, Session] = {}
         self._lock = asyncio.Lock()
 
     async def create(self, token: str, user_id: str) -> Session:
         key_epoch = await self._keys.current_epoch()
+        signed_token = await self._signer.sign(token, key_epoch)
         async with self._lock:
-            session = Session(token, user_id, key_epoch)
-            self._sessions[token] = session
+            session = Session(signed_token, user_id, key_epoch)
+            self._sessions[signed_token] = session
             return session
 
     async def refresh(self, token: str) -> Session | None:
+        key_epoch = await self._keys.current_epoch()
         async with self._lock:
             session = self._sessions.get(token)
             if session is None:
                 return None
 
-            session.key_epoch = await self._keys.current_epoch()
+            session.key_epoch = key_epoch
             return session
 
     async def expire_before(self, epoch: int) -> int:
@@ -70,9 +79,9 @@ class SessionRegistry:
 
 
 class SessionService:
-    def __init__(self) -> None:
+    def __init__(self, signer: TokenSigner) -> None:
         self.keys = KeyRing()
-        self.sessions = SessionRegistry(self.keys)
+        self.sessions = SessionRegistry(self.keys, signer)
         self.keys.attach_sessions(self.sessions)
 
     async def open_session(self, token: str, user_id: str) -> Session:

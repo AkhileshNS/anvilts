@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { composeStateMachines } from "../src/compose.ts";
+import { analyzeProgress, parseProgressProperty } from "../src/progress.ts";
 import { monitorProperty } from "../src/property.ts";
 import { detectDeadlocks } from "../src/reachability.ts";
 import {
@@ -17,12 +18,18 @@ type Verdict =
   | "deadlock"
   | "no deadlock"
   | "property violation"
-  | "no property violation";
+  | "no property violation"
+  | "progress violation"
+  | "no progress violation";
 
 const DEADLOCK_VERDICTS = new Set<Verdict>(["deadlock", "no deadlock"]);
 const SAFETY_VERDICTS = new Set<Verdict>([
   "property violation",
   "no property violation",
+]);
+const PROGRESS_VERDICTS = new Set<Verdict>([
+  "progress violation",
+  "no progress violation",
 ]);
 
 interface CaseIndexEntry {
@@ -44,6 +51,7 @@ interface ParityCase {
   name: string;
   inputs: unknown[];
   property?: unknown;
+  progress?: unknown[];
   output: Verdict;
   meta: {
     source: string;
@@ -53,6 +61,9 @@ interface ParityCase {
     expectedComposite: ExpectedComposite | null;
     deadlockTrace?: string[];
     violationTrace?: string[];
+    terminalSetActions?: string[];
+    prefixTrace?: string[];
+    cycleTrace?: string[];
   };
 }
 
@@ -119,18 +130,26 @@ function parseCase(value: unknown, file: string): ParityCase {
     throw new Error(`${file} must contain at least one input machine.`);
   }
 
-  if (!DEADLOCK_VERDICTS.has(candidate.output!) && !SAFETY_VERDICTS.has(candidate.output!)) {
-    throw new Error(`${file} has an invalid output verdict.`);
-  }
-
+  const isProgress = candidate.progress !== undefined;
   const isSafety = candidate.property !== undefined;
 
-  if (isSafety && !SAFETY_VERDICTS.has(candidate.output!)) {
-    throw new Error(`${file} carries a property but a non-safety verdict.`);
+  if (isProgress && isSafety) {
+    throw new Error(`${file} carries both a property and progress properties.`);
   }
 
-  if (!isSafety && !DEADLOCK_VERDICTS.has(candidate.output!)) {
-    throw new Error(`${file} has a safety verdict but no property machine.`);
+  if (isProgress) {
+    if (!Array.isArray(candidate.progress) || candidate.progress.length === 0) {
+      throw new Error(`${file} must contain at least one progress property.`);
+    }
+    if (!PROGRESS_VERDICTS.has(candidate.output!)) {
+      throw new Error(`${file} carries progress properties but a non-progress verdict.`);
+    }
+  } else if (isSafety) {
+    if (!SAFETY_VERDICTS.has(candidate.output!)) {
+      throw new Error(`${file} carries a property but a non-safety verdict.`);
+    }
+  } else if (!DEADLOCK_VERDICTS.has(candidate.output!)) {
+    throw new Error(`${file} has no property/progress machine but a non-deadlock verdict.`);
   }
 
   if (typeof candidate.meta !== "object" || candidate.meta === null) {
@@ -178,7 +197,40 @@ async function runCase(entry: CaseIndexEntry): Promise<CaseResult> {
     let states: number;
     let transitions: number;
 
-    if (fixture.property !== undefined) {
+    if (fixture.progress !== undefined) {
+      // Progress / liveness case: analyze the composed system's reachable graph
+      // for a terminal set (SCC) that starves the progress action set.
+      const properties = fixture.progress.map(parseProgressProperty);
+      const reachable = detectDeadlocks(system);
+      states = reachable.states.length;
+      transitions = reachable.transitions.length;
+
+      const analysis = analyzeProgress(system, reachable, properties);
+      actual = analysis.violations.length > 0
+        ? "progress violation"
+        : "no progress violation";
+
+      if (actual !== fixture.output) {
+        issues.push(`verdict: expected ${fixture.output}, received ${actual}`);
+      }
+
+      // Progress models are pre-filtered to faithfully composable ones, so the
+      // reachable graph must match LTSA's composite counts exactly.
+      if (fixture.meta.exactCounts !== false && fixture.meta.expectedComposite !== null) {
+        if (states !== fixture.meta.expectedComposite.states) {
+          issues.push(
+            `states: expected ${fixture.meta.expectedComposite.states}, received ${states}`,
+          );
+        }
+
+        if (transitions !== fixture.meta.expectedComposite.transitions) {
+          issues.push(
+            `transitions: expected ${fixture.meta.expectedComposite.transitions}, ` +
+              `received ${transitions}`,
+          );
+        }
+      }
+    } else if (fixture.property !== undefined) {
       // Safety case: monitor the composed system with the authored property.
       const monitored = monitorProperty(system, parseStateMachine(fixture.property));
       const analysis = detectDeadlocks(monitored);

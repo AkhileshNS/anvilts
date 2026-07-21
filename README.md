@@ -62,25 +62,25 @@ codex plugin add anvilts@anvilts-local
 
 The examples are intentionally ordinary service code. Their names and comments do not disclose the concurrency defect.
 
-### Document service
+### Deadlock detection: Document service
 
 > Use $verify-concurrent-system to inspect `examples/document-service`. Document deletion occasionally stops responding while the audit uploader is active. Determine whether concurrency could explain it.
 
-This exercises coordination between a document store and a buffered audit subsystem.
+This exercises coordination between a document store and a buffered audit subsystem. The composed model reaches a state where each operation holds one resource while waiting for the other.
 
-### Report service
+### Safety-property verification: Session service
 
-> Use $verify-concurrent-system to inspect `examples/report-service`. Month-end batches reliably stop making progress when several accounts are processed together. Find the concurrency failure and verify your explanation.
+> Use $verify-concurrent-system to inspect `examples/session-service`. Sessions created while signing keys rotate occasionally remain active with a retired key epoch. Determine whether an interleaving can violate the invariant that every stored session uses the current key epoch.
 
-This exercises a bounded executor and nested background work rather than explicit lock ordering.
+This exercises a finite safety monitor: the service continues running, but one ordering of epoch reads, rotation, expiry, and publication reaches an invalid state.
 
-### Session service
+### Progress verification: Report service
 
-> Use $verify-concurrent-system to inspect `examples/session-service`. We see rare authentication stalls when key rotation overlaps heavy session refresh traffic. Determine whether the implementation permits a permanent wait.
+> Use $verify-concurrent-system to inspect `examples/report-service`. When a month-end batch contains an archived account, workers remain active and snapshot retries keep appearing, but the batch never returns. Determine whether this is a deadlock or a progress failure and verify the appropriate property.
 
-This exercises asynchronous coordination across the session registry and key manager.
+This exercises conditional progress under LTSA fair choice: if snapshot retries recur infinitely, report completion must also recur. The worker keeps taking transitions, so the failure is not a deadlock.
 
-For each demo, Codex should inspect the code, propose a finite abstraction, and ask for confirmation. Once approved, AnviLTS validates the model and returns a shortest counterexample if the failure is reachable. The user can then ask Codex to fix the implementation and verify the revised model.
+For each demo, Codex should inspect the code, propose a finite abstraction, and ask for confirmation. Once approved, AnviLTS validates the model and returns a shortest finite counterexample or a shortest prefix into a violating recurrent region. The user can then ask Codex to fix the implementation and verify the revised model.
 
 AnviLTS proves the approved model under its stated assumptions. It does not claim that model extraction establishes source-code equivalence.
 

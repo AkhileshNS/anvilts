@@ -2,10 +2,12 @@
 
 LTSA-backed parity test cases for the AnviLTS engine. Each fixture is a set of
 component LTSes plus the verdict the real LTSA tool produces. A runner feeds the
-`inputs` (and, for safety cases, the `property`) to the AnviLTS engine and checks
-that its verdict matches `output`.
+`inputs` (and, for safety cases the `property`, for liveness cases the
+`progress` declarations) to the AnviLTS engine and checks that its verdict
+matches `output`.
 
-There are two flavors, distinguished by the presence of a `property` field.
+There are three flavors, distinguished by which extra field is present:
+`property` (safety), `progress` (liveness), or neither (deadlock).
 `cases/index.json` lists every fixture with its `category` and expected `output`.
 
 ## Deadlock fixtures (`cases/*.json`, no `property`)
@@ -55,6 +57,42 @@ unreachable in `no property violation` cases. Safety fixtures assert the verdict
 only — the monitored product is not directly comparable to LTSA's composite
 counts.
 
+## Progress / liveness fixtures (`cases/*.json`, with `progress`)
+
+```jsonc
+{
+  "name": "chapter7_lts__Twocoin__RUN__TAILS",
+  "inputs": [ <StateMachine>, ... ],   // system component LTSes to compose
+  "progress": [                        // progress declarations checked together
+    { "name": "TAILS", "type": "progress", "actions": ["tails"] }
+  ],
+  "output": "progress violation" | "no progress violation",
+  "meta": {
+    "category": "progress",
+    "source": "example/chapter7_lts/Twocoin.lts",
+    "process": "RUN",                  // the target (||COMPOSITE, or a bare process)
+    "propertyName": "TAILS",
+    "componentCount": 1,
+    "exactCounts": true,
+    "expectedComposite": { "states": 6, "transitions": 8 }, // LTSA full compose
+    "terminalSetActions": ["heads", "toss"], // actions recurring in LTSA's terminal set
+    "prefixTrace": ["pick"],           // LTSA trace to the terminal set ([] if none)
+    "cycleTrace": ["toss", "heads"]    // LTSA cycle within the terminal set ([] if none)
+  }
+}
+```
+
+A `progress P = {a, b}` declaration asserts that on every infinite (fair-choice)
+execution at least one action of `P` occurs infinitely often. LTSA reports a
+violation when a *terminal set of states* (a terminal strongly-connected
+component the system can be trapped in) contains no action of `P`. Each fixture
+isolates a **single** literal progress property: the source file is stripped of
+all `progress` lines and given exactly that one, so `-c progress` returns that
+property's verdict alone. Only literal action sets whose actions all live in the
+composed system alphabet are emitted; indexed/parameterised sets
+(`progress W[i:1..N] = ...`) and priority/minimising/alphabet-extending models
+are skipped. These are faithfully composable, so `exactCounts` is always `true`.
+
 Each `StateMachine` follows the engine schema (`src/state-machine.ts`):
 `{ name, alphabet, initial, end, transitions }`, numeric state ids, `end: -1`.
 
@@ -82,16 +120,21 @@ deadlock trace length. It exits nonzero if any case differs from LTSA.
 Build the system: `inputs.length >= 2` → `composeStateMachines(inputs)`;
 `=== 1` → use it directly.
 
-- Deadlock case (no `property`): `detectDeadlocks(system).deadlocks.length > 0`
+- Deadlock case (no `property`/`progress`): `detectDeadlocks(system).deadlocks.length > 0`
   → `"deadlock"`, else `"no deadlock"`.
 - Safety case (has `property`): `monitorProperty(system, property)` then
   `detectDeadlocks(...)`; `violations.length > 0` → `"property violation"`, else
   `"no property violation"`.
+- Progress case (has `progress`): parse each entry with `parseProgressProperty`,
+  then `analyzeProgress(system, detectDeadlocks(system), properties)`;
+  `violations.length > 0` → `"progress violation"`, else `"no progress violation"`.
+  The composed reachable counts are asserted against `meta.expectedComposite`
+  (progress fixtures are always `exactCounts: true`).
 
-Optionally cross-check counts against `meta.expectedComposite` (deadlock cases
-with `exactCounts !== false` only) and traces against `meta.deadlockTrace` /
-`meta.violationTrace` (LTSA reports one shortest trace; prefer comparing length +
-replay validity over exact equality).
+Optionally cross-check counts against `meta.expectedComposite` (deadlock and
+progress cases with `exactCounts !== false`) and traces against
+`meta.deadlockTrace` / `meta.violationTrace` (LTSA reports one shortest trace;
+prefer comparing length + replay validity over exact equality).
 
 ## Regenerating
 
@@ -105,12 +148,16 @@ LTSP_DIR=/path/to/ltsp-extension node parity/gen-cases.ts
 
 `gen-cases.ts` discovers every `||COMPOSITE` definition, runs `ltsp.jar`
 (`-b compose -go` for component LTSes, `-c safety` for the verdict), converts
-the components via `convert.ts`, and writes the fixtures.
+the components via `convert.ts`, and writes the fixtures. It then runs a second
+progress pass: for each faithfully composable target and each literal
+`progress` property, it writes an isolated single-property FSP file, runs
+`-c progress`, and emits the liveness fixture.
 
 ## Scope and exclusions
 
-Deadlock and safety (`property` monitor) categories are emitted. A composite is
-skipped when it cannot be faithfully represented in the current engine schema:
+Deadlock, safety (`property` monitor), and progress (`progress` declaration)
+categories are emitted. A composite is skipped when it cannot be faithfully
+represented in the current engine schema:
 
 | Skip reason | Applies to | Why |
 | --- | --- | --- |
@@ -119,10 +166,10 @@ skipped when it cannot be faithfully represented in the current engine schema:
 | `END` | deadlock | The jar renders END and STOP identically (`"on": {}`); the engine can't tell termination from deadlock. |
 | no single identifiable property | safety | The composite has zero or multiple `property` components, so a single monitor can't be isolated. |
 | non-clean property verdict | safety | LTSA reports a deadlock or a non-property ERROR (e.g. a bounded lock) rather than a clean hold/violation of the property. |
+| non-literal `progress` set | progress | Indexed/parameterised sets (`progress W[i:1..N] = ...`) or set-constant references can't be expanded to concrete actions here. |
+| progress action not in alphabet | progress | A literal progress action is absent from the composed system alphabet (e.g. hidden to `tau`), which the engine rejects. |
 
 Composites using priority (`<<` / `>>`) or `minimal` / `deterministic` are kept
-but marked `exactCounts: false` (verdict-only), since LTSA's graph reduction is
-not reproducible by the engine.
-
-Progress/liveness categories can be added once the engine supports liveness
-checking.
+(for deadlock/safety) but marked `exactCounts: false` (verdict-only), since
+LTSA's graph reduction is not reproducible by the engine. For progress, whole
+files using priority, minimization, or alphabet extension are skipped.

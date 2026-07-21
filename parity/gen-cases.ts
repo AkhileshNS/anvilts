@@ -19,10 +19,15 @@
  *     { "name", "inputs": [<system LTS>, ...], "property": <LTS>,
  *       "output": "property violation" | "no property violation", "meta" }
  *
+ *   Progress / liveness (files with a literal `progress P = {..}` declaration):
+ *     { "name", "inputs": [<system LTS>, ...], "progress": [{"name", "actions"}],
+ *       "output": "progress violation" | "no progress violation", "meta" }
+ *
  * The `property` LTS is the *authored* monitor: the jar's ERROR-completion
  * transitions are stripped so the engine's own `completeProperty` re-derives
  * them. Composites that use alphabet extension (`+{...}`) are skipped because
- * the jar's graph JSON omits alphabets.
+ * the jar's graph JSON omits alphabets. Progress fixtures isolate a single
+ * property per file so `-c progress` reports that property's verdict alone.
  */
 import { spawnSync } from "node:child_process";
 import {
@@ -297,7 +302,7 @@ function parseCounts(text: string): { states: number; transitions: number } | nu
 interface IndexEntry {
   name: string;
   file: string;
-  category: "deadlock" | "safety";
+  category: "deadlock" | "safety" | "progress";
   output: string;
   source: string;
   process: string;
@@ -354,23 +359,27 @@ function buildCases(jobs: Job[]): { skips: Skip[]; index: IndexEntry[] } {
     if (entry) index.push(entry);
   }
 
-  index.sort((a, b) => a.name.localeCompare(b.name));
+  return { skips, index };
+}
+
+/** Writes the unified fixture index across all categories. */
+function writeIndex(index: IndexEntry[]): void {
+  const sorted = [...index].sort((a, b) => a.name.localeCompare(b.name));
   writeFileSync(
     join(CASES_DIR, "index.json"),
     JSON.stringify(
       {
-        count: index.length,
-        deadlock: index.filter((entry) => entry.category === "deadlock").length,
-        safety: index.filter((entry) => entry.category === "safety").length,
-        cases: index,
+        count: sorted.length,
+        deadlock: sorted.filter((entry) => entry.category === "deadlock").length,
+        safety: sorted.filter((entry) => entry.category === "safety").length,
+        progress: sorted.filter((entry) => entry.category === "progress").length,
+        cases: sorted,
       },
       null,
       2,
     ) + "\n",
     "utf8",
   );
-
-  return { skips, index };
 }
 
 function buildDeadlockCase(
@@ -501,15 +510,332 @@ function buildSafetyCase(
   return { name: job.id, file, category: "safety", output, source: job.source, process: job.process };
 }
 
+// ===========================================================================
+// Progress (liveness) phase
+//
+// A `progress P = {a, b}` declaration asserts that on every infinite execution
+// at least one action of P occurs infinitely often. LTSA (fair-choice) reports
+// a violation when a *terminal set of states* (a terminal strongly-connected
+// component the system can be trapped in) contains no action of P.
+//
+// We generate one fixture per (composable target, single literal progress
+// property): the original file is stripped of all `progress` lines and given
+// exactly the property under test, so `-c progress` yields that property's
+// verdict in isolation. Only literal action sets on faithfully composable
+// targets are emitted; indexed/parameterised sets and priority/minimising or
+// alphabet-extending models are skipped (consistent with the other phases).
+// ===========================================================================
+
+interface ProgressProperty {
+  name: string;
+  actions: string[];
+}
+
+interface ProgressJob {
+  id: string;
+  rel: string;
+  source: string;
+  target: string;
+  isComposite: boolean;
+  property: ProgressProperty;
+  /** Isolated FSP: original content minus every `progress` line, plus this one. */
+  ltsContent: string;
+}
+
+/** `progress NAME = {a, b, ...}` with a purely literal action set. */
+function literalProgressProperties(content: string): ProgressProperty[] {
+  const properties: ProgressProperty[] = [];
+
+  for (const match of content.matchAll(
+    /^[ \t]*progress[ \t]+([A-Za-z_][A-Za-z0-9_]*)[ \t]*=[ \t]*\{([^}]*)\}[ \t]*$/gm,
+  )) {
+    const actions = match[2]!
+      .split(",")
+      .map((token) => token.trim())
+      .filter((token) => token.length > 0);
+
+    // Literal action names only: lowercase-initial, no ranges/indices/set refs.
+    const literal =
+      actions.length > 0 && actions.every((action) => /^[a-z][A-Za-z0-9_.]*$/.test(action));
+
+    if (literal) {
+      properties.push({ name: match[1]!, actions });
+    }
+  }
+
+  return properties;
+}
+
+/** Top-level primitive process heads (`NAME = ...`), excluding indexed sub-states. */
+function topLevelProcessHeads(content: string): string[] {
+  const names = new Set<string>();
+
+  for (const match of content.matchAll(/^([A-Z][A-Za-z0-9_]*)[ \t]*=/gm)) {
+    names.add(match[1]!);
+  }
+
+  return [...names];
+}
+
+function stripProgressLines(content: string): string {
+  return content
+    .split("\n")
+    .filter((line) => !/^[ \t]*progress\b/.test(line))
+    .join("\n");
+}
+
+function planProgressJobs(): ProgressJob[] {
+  const jobs: ProgressJob[] = [];
+
+  for (const file of listLtsFiles(EXAMPLE_DIR)) {
+    const rel = posix.join("example", relative(EXAMPLE_DIR, file).split(sep).join("/"));
+    const content = readFileSync(file, "utf8");
+
+    const properties = literalProgressProperties(content);
+    if (properties.length === 0) {
+      continue;
+    }
+
+    // Skip models the engine cannot faithfully reproduce: priority (`<<`/`>>`),
+    // bisimulation minimisation, and alphabet extension (`+{...}` or `) + Set`).
+    if (/<<|>>/.test(content)) continue;
+    if (/\bminimal\b|\bdeterministic\b/.test(content)) continue;
+    if (/\+\s*\{/.test(content) || /\)\s*\+/.test(content)) continue;
+
+    const composites = compositeNames(content);
+    let targets: Array<{ name: string; isComposite: boolean }>;
+
+    if (composites.length > 0) {
+      targets = composites.map((name) => ({ name, isComposite: true }));
+    } else {
+      const heads = topLevelProcessHeads(content);
+      // Only a single, unambiguous primitive process can stand in for DEFAULT.
+      if (heads.length !== 1) continue;
+      targets = [{ name: heads[0]!, isComposite: false }];
+    }
+
+    const stripped = stripProgressLines(content);
+
+    for (const target of targets) {
+      for (const property of properties) {
+        const id = `${toId(rel, target.name)}__${property.name}`;
+        const ltsContent = `${stripped}\nprogress ${property.name} = {${property.actions.join(",")}}\n`;
+        jobs.push({
+          id,
+          rel,
+          source: rel,
+          target: target.name,
+          isComposite: target.isComposite,
+          property,
+          ltsContent,
+        });
+      }
+    }
+  }
+
+  return jobs;
+}
+
+const PROGRESS_DIR = join(JAROUT_DIR, "progress");
+
+function generateProgressOracle(jobs: ProgressJob[]): void {
+  mkdirSync(PROGRESS_DIR, { recursive: true });
+
+  for (const job of jobs) {
+    writeFileSync(join(PROGRESS_DIR, `${job.id}.lts`), job.ltsContent, "utf8");
+  }
+
+  const tsv = jobs.map((job) => `${job.id}\t${job.target}`).join("\n") + "\n";
+  writeFileSync(join(PROGRESS_DIR, "jobs.tsv"), tsv, "utf8");
+
+  const script = [
+    "#!/usr/bin/env bash",
+    "set -u",
+    "JAR=/work/ltsp.jar",
+    'while IFS=$\'\\t\' read -r id proc; do',
+    '  [ -z "$id" ] && continue',
+    '  d="/out/progress/$id"',
+    '  mkdir -p "$d"',
+    '  lts="/out/progress/$id.lts"',
+    '  timeout 120 java -jar "$JAR" "$lts" -b compose -p "$proc" -go "$d/machines.json" > "$d/compose.txt" 2>&1',
+    '  echo "compose_exit=$?" > "$d/status"',
+    '  timeout 120 java -jar "$JAR" "$lts" -c progress -p "$proc" > "$d/progress.txt" 2>&1',
+    '  echo "progress_exit=$?" >> "$d/status"',
+    "done < /out/progress/jobs.tsv",
+    'echo "progress-oracle-complete"',
+    "",
+  ].join("\n");
+  writeFileSync(join(PROGRESS_DIR, "run.sh"), script, "utf8");
+
+  console.log(`Running ltsp.jar progress checks over ${jobs.length} property job(s) ...`);
+  const result = spawnSync(
+    "docker",
+    ["run", "--rm", "-v", `${LTSP_DIR}:/work`, "-v", `${JAROUT_DIR}:/out`, JRE_IMAGE, "bash", "/out/progress/run.sh"],
+    { stdio: "inherit" },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(`Progress oracle generation failed (docker exit ${result.status}).`);
+  }
+}
+
+interface ProgressVerdict {
+  kind: "holds" | "violation" | "other";
+  property?: string;
+  prefix: string[];
+  cycle: string[];
+  terminalActions: string[];
+}
+
+function parseActionSet(lines: string[]): string[] {
+  const joined = lines.join(" ").trim();
+  const inner = /^\{(.*)\}$/.exec(joined);
+  const body = inner ? inner[1]! : joined;
+  return body
+    .split(",")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+}
+
+function parseProgressVerdict(text: string): ProgressVerdict {
+  const violation = /Progress violation:\s*([A-Za-z_][A-Za-z0-9_]*)/.exec(text);
+
+  if (violation) {
+    return {
+      kind: "violation",
+      property: violation[1]!,
+      prefix: traceAfter(text, /Trace to terminal set of states:/),
+      cycle: traceAfter(text, /Cycle in terminal set:/),
+      terminalActions: parseActionSet(traceAfter(text, /Actions in terminal set:/)),
+    };
+  }
+
+  if (/No progress violations detected\./.test(text)) {
+    return { kind: "holds", prefix: [], cycle: [], terminalActions: [] };
+  }
+
+  return { kind: "other", prefix: [], cycle: [], terminalActions: [] };
+}
+
+function buildProgressCases(jobs: ProgressJob[]): { skips: Skip[]; index: IndexEntry[] } {
+  const skips: Skip[] = [];
+  const index: IndexEntry[] = [];
+
+  for (const job of jobs) {
+    const dataDir = join(PROGRESS_DIR, job.id);
+    const machinesFile = join(dataDir, "machines.json");
+    const status = readStatus(dataDir);
+
+    if (status["compose_exit"] !== "0" || status["progress_exit"] !== "0" || !existsSync(machinesFile)) {
+      skips.push({ id: job.id, reason: `jar progress run failed (compose ${status["compose_exit"] ?? "?"}, progress ${status["progress_exit"] ?? "?"})` });
+      continue;
+    }
+
+    const machinesRaw = readFileSync(machinesFile, "utf8");
+
+    if (/tau\(/.test(machinesRaw)) {
+      skips.push({ id: job.id, reason: "component contains ERROR state (tau(-1))" });
+      continue;
+    }
+
+    let graph: LtspGraph;
+    try {
+      graph = JSON.parse(machinesRaw) as LtspGraph;
+    } catch (error) {
+      skips.push({ id: job.id, reason: `invalid machines JSON: ${String(error)}` });
+      continue;
+    }
+
+    // The jar echoes the composed result as `-p` (a composite) or `DEFAULT`
+    // (a bare process); the remaining machines are the parallel components.
+    const excluded = new Set<string>(["DEFAULT"]);
+    if (job.isComposite) excluded.add(job.target);
+    const components = graph.machines.filter((machine) => !excluded.has(machine.key));
+
+    if (components.length === 0) {
+      skips.push({ id: job.id, reason: "no component machines emitted" });
+      continue;
+    }
+
+    const verdict = parseProgressVerdict(readFileSync(join(dataDir, "progress.txt"), "utf8"));
+    let output: "progress violation" | "no progress violation";
+
+    if (verdict.kind === "holds") {
+      output = "no progress violation";
+    } else if (verdict.kind === "violation" && verdict.property === job.property.name) {
+      output = "progress violation";
+    } else {
+      skips.push({
+        id: job.id,
+        reason: `unexpected progress verdict (${verdict.kind}${verdict.property ? ` in ${verdict.property}` : ""})`,
+      });
+      continue;
+    }
+
+    let inputs;
+    try {
+      inputs = components.map((machine) => parseStateMachine(convertMachine(machine)));
+    } catch (error) {
+      skips.push({ id: job.id, reason: `conversion failed: ${String(error)}` });
+      continue;
+    }
+
+    // The engine validates that progress actions live in the composed system's
+    // alphabet (union of components); drop fixtures that would violate that.
+    const alphabet = new Set(inputs.flatMap((machine) => machine.alphabet));
+    const missing = job.property.actions.filter((action) => !alphabet.has(action));
+    if (missing.length > 0) {
+      skips.push({ id: job.id, reason: `progress action(s) not in system alphabet: ${missing.join(", ")}` });
+      continue;
+    }
+
+    const counts = parseCounts(readFileSync(join(dataDir, "compose.txt"), "utf8"));
+    const fixture = {
+      name: job.id,
+      inputs,
+      progress: [{ name: job.property.name, type: "progress", actions: job.property.actions }],
+      output,
+      meta: {
+        category: "progress",
+        source: job.source,
+        process: job.target,
+        propertyName: job.property.name,
+        componentCount: inputs.length,
+        exactCounts: true,
+        expectedComposite: counts,
+        terminalSetActions: verdict.terminalActions,
+        prefixTrace: verdict.prefix,
+        cycleTrace: verdict.cycle,
+      },
+    };
+
+    const file = `${job.id}.json`;
+    writeFileSync(join(CASES_DIR, file), JSON.stringify(fixture, null, 2) + "\n", "utf8");
+    index.push({ name: job.id, file, category: "progress", output, source: job.source, process: job.target });
+  }
+
+  return { skips, index };
+}
+
 const jobs = planJobs();
 generateOracle(jobs);
 const { skips, index } = buildCases(jobs);
 
+const progressJobs = planProgressJobs();
+generateProgressOracle(progressJobs);
+const { skips: progressSkips, index: progressIndex } = buildProgressCases(progressJobs);
+
+const allIndex = [...index, ...progressIndex];
+writeIndex(allIndex);
+skips.push(...progressSkips);
+
 console.log("\n==================== fixture generation ====================");
 console.log(`Composites discovered : ${jobs.length}`);
-console.log(`Fixtures emitted      : ${index.length}`);
-console.log(`  deadlock            : ${index.filter((entry) => entry.category === "deadlock").length}`);
-console.log(`  safety              : ${index.filter((entry) => entry.category === "safety").length}`);
+console.log(`Progress jobs         : ${progressJobs.length}`);
+console.log(`Fixtures emitted      : ${allIndex.length}`);
+console.log(`  deadlock            : ${allIndex.filter((entry) => entry.category === "deadlock").length}`);
+console.log(`  safety              : ${allIndex.filter((entry) => entry.category === "safety").length}`);
+console.log(`  progress            : ${allIndex.filter((entry) => entry.category === "progress").length}`);
 console.log(`Skipped               : ${skips.length}`);
 console.log(`Cases directory       : ${CASES_DIR}`);
 
