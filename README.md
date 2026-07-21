@@ -1,8 +1,8 @@
 # AnviLTS
 
-AnviLTS is a repository-aware formal-verification tool for concurrent systems. An AI coding agent inspects an implementation, works with the user to define a finite labelled transition system, and delegates the actual proof to a deterministic model-checking engine.
+AnviLTS is an MCP server for a reconstructed LTSA (Labelled Transition System Analyser) engine. It makes LTSA's academic safety-verification capabilities available to users and AI coding agents through structured tools for modelling, composition, deadlock detection, safety-property verification, and counterexample visualization.
 
-No FSP authoring, hosted backend, or API key is required. The bundled MCP server makes no network calls.
+An agent can inspect concurrent code, construct a finite labelled transition system with the user, and submit that model to AnviLTS for exhaustive verification. This gives LLMs a mathematical way to test their concurrency claims, reducing the risk that a plausible explanation or proposed fix is accepted without proof.
 
 ```mermaid
 flowchart LR
@@ -13,18 +13,18 @@ flowchart LR
     E --> F["Shortest trace + optional SVG graph"]
 ```
 
-## Portable MCP server
+## MCP server
 
-The verification server is not tied to Codex. It is a standard local MCP server using the `stdio` transport, so any MCP client that can launch a Node.js subprocess can use its four tools:
+AnviLTS runs as a local MCP server using the `stdio` transport and exposes four tools:
 
 - `validate_model`: validate component LTS definitions and optional safety monitors.
 - `compose_lts`: construct the reachable parallel composition.
 - `verify_lts`: detect deadlocks, reserved ERROR states, and safety-property violations.
 - `render_lts`: render a dark SVG state graph with an optional highlighted trace.
 
-The Codex plugin adds the repository-inspection and human-approval workflow. Other clients still receive the deterministic tools, but their agent needs equivalent modeling instructions. SVG presentation also depends on how that client displays MCP resources.
+The included Codex plugin provides the repository-inspection, model-review, verification, and counterexample-explanation workflow.
 
-After cloning or building the repository, the portable server entry point is:
+The built MCP server entry point is:
 
 ```text
 plugins/anvilts/mcp/server.mjs
